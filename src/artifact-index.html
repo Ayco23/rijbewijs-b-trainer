@@ -368,11 +368,11 @@ var AFB = {
       blokjes+='<rect x="'+(248+i*5)+'" y="'+(40+j*7)+'" width="5" height="7" fill="'+(((i+j)%2)?'#fff':'#1b2330')+'"/>';
     var strepen='';
     for(var k=0;k<11;k++) strepen+='<rect x="'+(10+k*24)+'" y="51" width="13" height="3" rx="1.5" fill="#fff" opacity=".85"/>';
-    return '<svg viewBox="0 0 280 72" class="rit" aria-hidden="true">'+
+    return '<svg viewBox="0 22 280 46" class="rit" aria-hidden="true">'+
       '<rect x="0" y="34" width="280" height="30" rx="4" fill="#424b58"/>'+
       '<rect x="0" y="31" width="280" height="3" fill="#8e98a6" opacity=".5"/>'+
       strepen + blokjes +
-      '<g transform="translate('+x+' 20)">'+AFB.auto(klaar?'#4bd08a':'#f2c200',44)+'</g>'+
+      '<g transform="translate('+x+' 27)">'+AFB.auto(klaar?'#4bd08a':'#f2c200',44)+'</g>'+
       '</svg>';
   },
   /* Stoplicht, gebruikt bij de uitslag van het proefexamen. */
