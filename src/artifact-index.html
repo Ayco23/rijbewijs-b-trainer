@@ -1,0 +1,1156 @@
+<title>Rijbewijs B Trainer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: mobiele app met vaste bovenbalk (XP) en onderbalk (tabs); content scrolt ertussen.
+   Palet komt uit de RVV-bordenwereld: bordblauw, bordrood, haaientandwit, asfaltgrijs met blauwe inslag. */
+:root{
+  --bg:#f4f6f9; --surface:#ffffff; --surface-2:#eef1f6; --line:#d6dce6;
+  --fg:#15202e; --fg-2:#5a6779; --fg-3:#8793a5;
+  --blauw:#0b4ea2; --blauw-zacht:#e4edf9; --rood:#d2272e; --geel:#f2c200;
+  --goed:#17794a; --goed-zacht:#e1f3e9; --fout:#c22a2a; --fout-zacht:#fbe6e6;
+  --asfalt:#3d4652;
+  --m-voorrang:#0b4ea2; --m-tekens:#b4541a; --m-weg:#0e7490; --m-bijzonder:#6d28d9;
+  --m-veilig:#b91c1c; --m-milieu:#15803d; --m-wet:#a16207; --m-voertuig:#475569;
+  --f-disp:'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --f-body:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --r:14px; --sh:0 1px 2px rgba(21,32,46,.08), 0 6px 18px rgba(21,32,46,.06);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#10151c; --surface:#19202a; --surface-2:#222b37; --line:#303b4a;
+  --fg:#eaeff6; --fg-2:#a2aebf; --fg-3:#78859a;
+  --blauw:#5a9bf0; --blauw-zacht:#1b2736; --rood:#f0646a;
+  --goed:#4bd08a; --goed-zacht:#14301f; --fout:#f0646a; --fout-zacht:#311718;
+  --asfalt:#aab6c6; --m-voorrang:#5a9bf0; --m-tekens:#e08a4e; --m-weg:#38bdf8; --m-bijzonder:#a78bfa;
+  --m-veilig:#f87171; --m-milieu:#4ade80; --m-wet:#fbbf24; --m-voertuig:#94a3b8;
+  --sh:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  color-scheme:dark; }}
+:root[data-theme="dark"]{
+  --bg:#10151c; --surface:#19202a; --surface-2:#222b37; --line:#303b4a;
+  --fg:#eaeff6; --fg-2:#a2aebf; --fg-3:#78859a;
+  --blauw:#5a9bf0; --blauw-zacht:#1b2736; --rood:#f0646a;
+  --goed:#4bd08a; --goed-zacht:#14301f; --fout:#f0646a; --fout-zacht:#311718;
+  --asfalt:#aab6c6; --m-voorrang:#5a9bf0; --m-tekens:#e08a4e; --m-weg:#38bdf8; --m-bijzonder:#a78bfa;
+  --m-veilig:#f87171; --m-milieu:#4ade80; --m-wet:#fbbf24; --m-voertuig:#94a3b8;
+  --sh:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  color-scheme:dark; }
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  display:flex;flex-direction:column;overflow:hidden}
+h1,h2,h3,h4{font-family:var(--f-disp);margin:0;text-wrap:balance;letter-spacing:-.01em}
+button{font:inherit;color:inherit}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ---- bovenbalk ---- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+header{flex:0 0 auto;background:var(--surface);border-bottom:1px solid var(--line);z-index:20}
+.hwrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:10px;display:flex;align-items:center;gap:12px}
+.lvl{flex:0 0 auto;width:40px;height:40px;border-radius:50%;background:var(--blauw);color:#fff;display:grid;place-items:center;
+  font-family:var(--f-disp);font-weight:800;font-size:15px}
+.xpcol{flex:1 1 auto;min-width:0}
+.xptop{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;color:var(--fg-2)}
+.xptop b{font-family:var(--f-disp);font-size:13px;color:var(--fg)}
+.bar{height:7px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:4px}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--blauw),var(--geel));transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.hbtn{flex:0 0 auto;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);cursor:pointer;display:grid;place-items:center;font-size:16px}
+.streak{flex:0 0 auto;font-size:12px;color:var(--fg-2);text-align:right;line-height:1.2}
+.streak b{display:block;font-family:var(--f-disp);font-size:16px;color:var(--fg)}
+
+/* ---- main ---- */
+main{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:16px 24px;max-width:720px;margin:0 auto}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--fg-3);font-weight:600}
+.muted{color:var(--fg-2)}
+.small{font-size:13px}
+.art{font-size:12px;color:var(--fg-3);font-variant-numeric:tabular-nums}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:11px;border:1px solid transparent;
+  background:var(--blauw);color:#fff;font-weight:600;cursor:pointer;text-align:center}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.sec{background:var(--surface-2);color:var(--fg);border-color:var(--line)}
+.btn.wide{width:100%}
+.btn:focus-visible,.opt:focus-visible,.hbtn:focus-visible,.tab:focus-visible{outline:3px solid var(--geel);outline-offset:2px}
+
+/* ---- tabs ---- */
+nav{flex:0 0 auto;background:var(--surface);border-top:1px solid var(--line);
+  padding-left:max(4px,env(safe-area-inset-left,0px));padding-right:max(4px,env(safe-area-inset-right,0px));
+  padding-bottom:env(safe-area-inset-bottom,0px);display:flex}
+.tab{flex:1 1 0;min-width:0;background:none;border:0;padding:8px 2px 10px;cursor:pointer;color:var(--fg-3);
+  display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:600}
+.tab svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-selected="true"]{color:var(--blauw)}
+
+/* ---- quiz ---- */
+.opt{display:block;width:100%;text-align:left;padding:13px 14px;border-radius:11px;border:1.5px solid var(--line);
+  background:var(--surface);cursor:pointer;margin:0;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--blauw)}
+.opt[data-st="sel"]{border-color:var(--blauw);background:var(--blauw-zacht)}
+.opt[data-st="goed"]{border-color:var(--goed);background:var(--goed-zacht)}
+.opt[data-st="fout"]{border-color:var(--fout);background:var(--fout-zacht)}
+.opt:disabled{cursor:default}
+.fb{border-radius:11px;padding:13px 14px;border:1.5px solid}
+.fb.goed{border-color:var(--goed);background:var(--goed-zacht)}
+.fb.fout{border-color:var(--fout);background:var(--fout-zacht)}
+.fb h4{font-size:14px;margin-bottom:4px}
+.pill{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600;background:var(--surface-2);color:var(--fg-2)}
+.prog{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--fg-2)}
+.prog .bar{flex:1;margin:0}
+.xppop{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:var(--goed);color:#fff;font-family:var(--f-disp);
+  font-weight:800;padding:7px 16px;border-radius:99px;z-index:50;pointer-events:none;opacity:0;transition:opacity .25s,transform .4s}
+.xppop.on{opacity:1;transform:translateX(-50%) translateY(-10px)}
+
+/* ---- grids ---- */
+.grid{display:grid;gap:10px}
+.g-mod{grid-template-columns:1fr}
+@media(min-width:560px){.g-mod{grid-template-columns:1fr 1fr}}
+.g-sign{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+.modcard{display:flex;gap:12px;align-items:center;text-align:left;border-left:4px solid var(--c);cursor:pointer;width:100%}
+.ring{flex:0 0 auto;width:46px;height:46px}
+.signtile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 6px;display:flex;flex-direction:column;
+  align-items:center;gap:6px;cursor:pointer;text-align:center}
+.bord{display:inline-block;line-height:0;vertical-align:middle}
+.bord svg{width:100%;height:100%;display:block}
+.signtile .bord{margin-inline:auto}
+.signtile .code{font-family:var(--f-disp);font-size:11px;color:var(--fg-2)}
+
+/* ---- battle pass ---- */
+.pass{display:flex;gap:10px;overflow-x:auto;padding-block:4px 10px;scroll-snap-type:x proximity}
+.tier{flex:0 0 118px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px;
+  display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;opacity:.55}
+.tier.unlocked{opacity:1;border-color:var(--geel);box-shadow:0 0 0 2px rgba(242,194,0,.18)}
+.tier .n{font-family:var(--f-disp);font-size:11px;color:var(--fg-3)}
+.tier .ic{font-size:24px;line-height:1}
+.tier .nm{font-size:11.5px;font-weight:600;line-height:1.3}
+
+/* ---- puzzel ---- */
+.scene{width:100%;max-width:340px;margin:0 auto;display:block;border-radius:12px;background:var(--surface-2)}
+.actorbtn{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);
+  background:var(--surface);cursor:pointer;font-weight:600}
+.actorbtn[data-st="sel"]{border-color:var(--blauw);background:var(--blauw-zacht)}
+.actorbtn .num{width:22px;height:22px;border-radius:50%;background:var(--blauw);color:#fff;display:grid;place-items:center;font-size:12px;font-family:var(--f-disp)}
+
+/* ---- examen ---- */
+.examtop{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;background:var(--bg);padding-block:8px;z-index:5}
+.timer{font-family:var(--f-disp);font-size:19px;font-variant-numeric:tabular-nums}
+.timer.laag{color:var(--fout)}
+.dots{display:flex;flex-wrap:wrap;gap:4px}
+.dot{width:23px;height:23px;border-radius:6px;border:1px solid var(--line);background:var(--surface);font-size:10.5px;cursor:pointer;
+  display:grid;place-items:center;padding:0;font-variant-numeric:tabular-nums}
+.dot[data-st="done"]{background:var(--blauw);color:#fff;border-color:var(--blauw)}
+.dot[data-st="mark"]{background:var(--geel);color:#15202e;border-color:var(--geel)}
+.dot[data-st="now"]{outline:2px solid var(--fg);outline-offset:1px}
+.score{font-family:var(--f-disp);font-size:46px;line-height:1}
+table.res{width:100%;border-collapse:collapse;font-size:13.5px}
+table.res td{padding:7px 0;border-bottom:1px solid var(--line)}
+table.res td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+
+.toast{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  background:var(--asfalt);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13px;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header>
+  <div class="hwrap">
+    <div class="lvl" id="lvl">1</div>
+    <div class="xpcol">
+      <div class="xptop"><b id="lvlnm">Leerling</b><span class="tnum" id="xptxt">0 / 100 XP</span></div>
+      <div class="bar"><i id="xpbar" style="width:0%"></i></div>
+    </div>
+    <div class="streak"><b class="tnum" id="streak">0</b>dagen</div>
+    <button class="hbtn" id="themebtn" title="Licht of donker" aria-label="Thema wisselen">◐</button>
+  </div>
+</header>
+
+<main id="main"><div class="wrap" id="view"></div></main>
+
+<nav id="nav"></nav>
+<div class="xppop" id="xppop"></div>
+<div class="toast" id="toast"></div>
+
+<script src="borden.js"></script>
+<script src="content-modules.js"></script>
+<script src="content-modules2.js"></script>
+<script src="content-extra.js"></script>
+<script>
+(function(){
+"use strict";
+var SIGNS = window.SIGNS || [];
+var MODULES = (window.MODULES || []).concat(window.MODULES2 || [])
+  .sort(function(a,b){ return a.nr-b.nr; });
+// Extra vragen worden per module achter de bestaande aangehaakt.
+(function(){ var X = window.EXTRA || {};
+  MODULES.forEach(function(m){ if(X[m.id] && X[m.id].length) m.questions = m.questions.concat(X[m.id]); });
+})();
+var EXAM = {vragen:50, minuten:30, grens:44};
+var $ = function(s,r){return (r||document).querySelector(s)};
+var el = function(tag,cls,txt){var n=document.createElement(tag); if(cls)n.className=cls; if(txt!=null)n.textContent=txt; return n};
+var esc = function(s){var d=document.createElement('div'); d.textContent=s; return d.innerHTML};
+
+/* ======================= STATE ======================= */
+var S = {
+  xp:0, streak:0, laatsteDag:null, dagenGedaan:{},
+  mod:{}, leitner:{}, fout:[], examens:[], gezien:{}
+};
+MODULES.forEach(function(m){ S.mod[m.id]={goed:0,fout:0,les:0}; });
+
+var LS_KEY='autotheorie-v1', db=null, userId=null, saveT=null, bron='lokaal';
+
+function schoon(raw){
+  if(!raw||typeof raw!=='object') return;
+  ['xp','streak'].forEach(function(k){ if(typeof raw[k]==='number') S[k]=raw[k]; });
+  if(typeof raw.laatsteDag==='string') S.laatsteDag=raw.laatsteDag;
+  ['dagenGedaan','leitner','gezien'].forEach(function(k){ if(raw[k]&&typeof raw[k]==='object') S[k]=raw[k]; });
+  if(Array.isArray(raw.fout)) S.fout=raw.fout.slice(0,500);
+  if(Array.isArray(raw.examens)) S.examens=raw.examens.slice(-25);
+  if(raw.mod&&typeof raw.mod==='object') MODULES.forEach(function(m){
+    var r=raw.mod[m.id]; if(r) S.mod[m.id]={goed:+r.goed||0, fout:+r.fout||0, les:+r.les||0};
+  });
+}
+function laadLokaal(){ try{ var r=localStorage.getItem(LS_KEY); if(r) schoon(JSON.parse(r)); }catch(e){} }
+function bewaar(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){}
+  if(db&&userId){ clearTimeout(saveT); saveT=setTimeout(function(){
+    try{ db.collection('data/users/'+userId).doc('voortgang').set(JSON.parse(JSON.stringify(S))); }catch(e){}
+  },700); }
+}
+async function initOpslag(){
+  laadLokaal(); teken();
+  try{
+    var user = await (window.claude && window.claude.use ? window.claude.use('user') : null);
+    var d = await (window.claude && window.claude.use ? window.claude.use('db') : null);
+    if(!user||!d) return;
+    userId = await user.id(); db = d;
+    var doc = await db.collection('data/users/'+userId).doc('voortgang').get();
+    var data = doc && (doc.data ? (typeof doc.data==='function'?doc.data():doc.data) : null);
+    if(data && typeof data.xp==='number' && data.xp>=S.xp){ schoon(data); bron='account'; }
+    else if(S.xp>0){ bewaar(); }
+    bron='account'; teken(); toast('Voortgang gesynchroniseerd met je account');
+  }catch(e){ /* lokaal blijft werken */ }
+}
+
+/* ======================= XP / LEVELS ======================= */
+var NIVEAUS=['Leerling','Kijker','Voorsorteerder','Voorrangskenner','Bordenlezer','Rotonde-ridder','Kruispuntkoning','Examenklaar'];
+function xpVoorLevel(n){ return 100*n + 25*n*(n-1); }   // 1:100, 2:250, 3:450 ...
+function level(){ var n=1; while(S.xp>=xpVoorLevel(n)) n++; return n; }
+function levelInfo(){
+  var n=level(), onder=n>1?xpVoorLevel(n-1):0, boven=xpVoorLevel(n);
+  return {n:n, naam:NIVEAUS[Math.min(n-1,NIVEAUS.length-1)], in:S.xp-onder, nodig:boven-onder, boven:boven};
+}
+function geefXP(n,reden){
+  var oud=level(); S.xp+=n; bewaar(); kopBij();
+  var p=$('#xppop'); p.textContent='+'+n+' XP'+(reden?' · '+reden:''); p.classList.add('on');
+  setTimeout(function(){p.classList.remove('on')},900);
+  if(level()>oud) setTimeout(function(){ toast('Level '+level()+': '+levelInfo().naam+'!'); },700);
+}
+function toast(t){ var n=$('#toast'); n.textContent=t; n.classList.add('on'); clearTimeout(n._t); n._t=setTimeout(function(){n.classList.remove('on')},2600); }
+
+function vandaagStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function dagBij(){
+  var t=vandaagStr(); if(S.laatsteDag===t) return;
+  var g=new Date(); g.setDate(g.getDate()-1);
+  var gister=g.getFullYear()+'-'+String(g.getMonth()+1).padStart(2,'0')+'-'+String(g.getDate()).padStart(2,'0');
+  S.streak = (S.laatsteDag===gister) ? S.streak+1 : 1;
+  S.laatsteDag=t; geefXP(20,'dag '+S.streak); bewaar();
+}
+
+/* ======================= BORDEN ======================= */
+/* De borden zijn de officiele RVV-tekeningen uit borden.js. Ze worden inline
+   geplaatst en door de wrapper op maat geschaald; de verhouding blijft intact. */
+function bordSVG(s,size){
+  var sz = size||60;
+  if(!s || !s.svg) return '<span class=\"bord\" style=\"width:'+sz+'px;height:'+sz+'px\"></span>';
+  return '<span class=\"bord\" role=\"img\" aria-label=\"'+esc(s.c+': '+s.n)+'\" style=\"width:'+sz+'px;height:'+sz+'px\">'+s.svg+'</span>';
+}
+
+/* ======================= VRAGEN-POOL ======================= */
+var ALLE=[];
+// Een bordvraag kan alleen gesteld worden als het bord ook echt in de set zit.
+var SIGN_CODES={}; SIGNS.forEach(function(s){ SIGN_CODES[s.c]=s; });
+MODULES.forEach(function(m){
+  m.questions = m.questions.filter(function(q){ return !(q.t==='sign' && !SIGN_CODES[q.signCode]); });
+  m.questions.forEach(function(q,i){ q.id=m.id+'#'+i; q.mod=m.id; q.modTitel=m.titel; ALLE.push(q); });
+});
+function vraagById(id){ for(var i=0;i<ALLE.length;i++) if(ALLE[i].id===id) return ALLE[i]; return null; }
+function schud(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+
+/* ======================= VRAAG RENDEREN ======================= */
+function toonVraag(q, opts){
+  opts=opts||{};
+  var box=el('div','card stack');
+  var kop=el('div','eyebrow', (opts.kop || q.modTitel));
+  box.appendChild(kop);
+  if(q.t==='sign' && q.signCode){
+    var sg=SIGNS.filter(function(s){return s.c===q.signCode})[0];
+    if(sg){ var holder=el('div'); holder.style.textAlign='center'; holder.innerHTML=bordSVG(sg,110); box.appendChild(holder); }
+  }
+  var vr=el('h3',null,q.v); vr.style.fontSize='17px'; box.appendChild(vr);
+  var opts_wrap=el('div','stack'); opts_wrap.style.gap='8px'; box.appendChild(opts_wrap);
+  var antwoordGegeven=false, keuze=[], volgorde=[];
+
+  function klaar(goed){
+    if(antwoordGegeven) return; antwoordGegeven=true;
+    var fb=el('div','fb '+(goed?'goed':'fout'));
+    fb.appendChild(el('h4',null,goed?'Goed':'Fout'));
+    fb.appendChild(el('div','small',q.u));
+    if(q.art) fb.appendChild(el('div','art',q.art));
+    box.appendChild(fb);
+    var nb=el('button','btn wide','Volgende'); nb.onclick=function(){ opts.next&&opts.next(goed); };
+    box.appendChild(nb); nb.focus();
+    S.gezien[q.id]=1;
+    var st=S.mod[q.mod]; if(st){ goed?st.goed++:st.fout++; }
+    if(goed){ geefXP(10,'goed'); S.fout=S.fout.filter(function(x){return x!==q.id}); }
+    else { if(S.fout.indexOf(q.id)<0) S.fout.push(q.id); }
+    bewaar();
+  }
+
+  if(q.t==='jn'){
+    ['Ja','Nee'].forEach(function(lab,i){
+      var b=el('button','opt',lab);
+      b.onclick=function(){ if(antwoordGegeven)return;
+        var goed=(i===q.a);
+        b.dataset.st=goed?'goed':'fout';
+        Array.prototype.forEach.call(opts_wrap.children,function(c,j){ c.disabled=true; if(j===q.a)c.dataset.st='goed'; });
+        klaar(goed); };
+      opts_wrap.appendChild(b);
+    });
+  } else if(q.t==='mc'||q.t==='sign'){
+    q.o.forEach(function(lab,i){
+      var b=el('button','opt',lab);
+      b.onclick=function(){ if(antwoordGegeven)return;
+        var goed=(i===q.a);
+        Array.prototype.forEach.call(opts_wrap.children,function(c,j){ c.disabled=true; if(j===q.a)c.dataset.st='goed'; });
+        if(!goed) b.dataset.st='fout';
+        klaar(goed); };
+      opts_wrap.appendChild(b);
+    });
+  } else if(q.t==='multi'){
+    box.insertBefore(el('div','small muted','Meerdere antwoorden zijn goed.'), opts_wrap);
+    q.o.forEach(function(lab,i){
+      var b=el('button','opt',lab);
+      b.onclick=function(){ if(antwoordGegeven)return;
+        var k=keuze.indexOf(i); if(k<0)keuze.push(i); else keuze.splice(k,1);
+        b.dataset.st = keuze.indexOf(i)<0 ? '' : 'sel'; };
+      opts_wrap.appendChild(b);
+    });
+    var ok=el('button','btn wide','Controleer');
+    ok.onclick=function(){ if(antwoordGegeven)return;
+      var a=q.a.slice().sort(), k=keuze.slice().sort();
+      var goed = a.length===k.length && a.every(function(v,i){return v===k[i]});
+      Array.prototype.forEach.call(opts_wrap.children,function(c,j){ c.disabled=true;
+        if(q.a.indexOf(j)>=0) c.dataset.st='goed'; else if(keuze.indexOf(j)>=0) c.dataset.st='fout'; else c.dataset.st=''; });
+      ok.remove(); klaar(goed); };
+    box.appendChild(ok);
+  } else if(q.t==='order'){
+    box.insertBefore(el('div','small muted','Klik ze aan in de juiste volgorde.'), opts_wrap);
+    var knoppen=[];
+    q.o.forEach(function(lab,i){
+      var b=el('button','actorbtn'); var num=el('span','num',''); num.style.visibility='hidden';
+      b.appendChild(num); b.appendChild(el('span',null,lab));
+      b.onclick=function(){ if(antwoordGegeven)return;
+        var p=volgorde.indexOf(i);
+        if(p>=0){ volgorde.splice(p,1); } else { volgorde.push(i); }
+        knoppen.forEach(function(kb,ki){ var pos=volgorde.indexOf(ki);
+          kb.dataset.st = pos<0?'':'sel';
+          var n=kb.querySelector('.num');
+          if(pos<0){ n.style.visibility='hidden'; n.textContent=''; } else { n.style.visibility='visible'; n.textContent=pos+1; } });
+        ok2.disabled = volgorde.length!==q.o.length; };
+      knoppen.push(b); opts_wrap.appendChild(b);
+    });
+    var ok2=el('button','btn wide','Controleer'); ok2.disabled=true;
+    ok2.onclick=function(){ if(antwoordGegeven)return;
+      var goed = volgorde.length===q.a.length && volgorde.every(function(v,i){return v===q.a[i]});
+      knoppen.forEach(function(kb){kb.disabled=true});
+      if(!goed){ var hint=el('div','small muted','Juiste volgorde: '+q.a.map(function(i){return q.o[i]}).join(' → ')); box.appendChild(hint); }
+      ok2.remove(); klaar(goed); };
+    box.appendChild(ok2);
+  } else if(q.t==='fill'){
+    var inp=document.createElement('input');
+    inp.type='text'; inp.id='fill-'+q.id.replace(/[^a-z0-9]/gi,''); inp.placeholder='Typ je antwoord';
+    inp.style.cssText='width:100%;padding:12px 14px;border-radius:11px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);font:inherit';
+    opts_wrap.appendChild(inp);
+    var ok3=el('button','btn wide','Controleer');
+    ok3.onclick=function(){ if(antwoordGegeven)return;
+      // Cijfers moeten meetellen, anders zou "1,6" met elk antwoord overeenkomen.
+      var norm=function(x){return (x||'').toLowerCase().replace(/[^a-z0-9]/g,'')};
+      var goed = norm(inp.value)!=='' && norm(inp.value)===norm(q.a);
+      inp.disabled=true; inp.style.borderColor = goed?'var(--goed)':'var(--fout)';
+      if(!goed) box.appendChild(el('div','small muted','Juiste antwoord: '+q.a));
+      ok3.remove(); klaar(goed); };
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter') ok3.click(); });
+    box.appendChild(ok3);
+  }
+  return box;
+}
+
+/* ======================= SCENE TEKENEN (puzzels) ======================= */
+/* Een route bestaat uit twee delen: het naderen van het kruispunt (dat loopt in een
+   lus zolang de vraag openstaat) en de volledige doorsteek (die na het antwoord in
+   de juiste volgorde wordt afgespeeld). Rechts rijden bepaalt de rijstrook. */
+function route(a){
+  var o = a.soort==='fiets' ? 6.5 : a.soort==='tram' ? -7 : 0;  // fietspad ligt rechts, tram in het midden
+  var N = 43 - o, Z = 57 + o, W = 43 - o, O = 57 + o;  // N/Z = x-stroken, W/O = y-stroken
+  var naar = a.naar || 'rd', full, app, lbl;
+  if(a.van==='zuid'){              // rijdt naar het noorden
+    lbl = [Z, 88];
+    app  = 'M'+Z+' 102 L'+Z+' 70';
+    full = naar==='rd'    ? 'M'+Z+' 102 L'+Z+' -2'
+         : naar==='rechts'? 'M'+Z+' 102 L'+Z+' '+O+' L102 '+O
+         :                  'M'+Z+' 102 L'+Z+' '+W+' L-2 '+W;
+  } else if(a.van==='noord'){      // rijdt naar het zuiden
+    lbl = [N, 12];
+    app  = 'M'+N+' -2 L'+N+' 30';
+    full = naar==='rd'    ? 'M'+N+' -2 L'+N+' 102'
+         : naar==='rechts'? 'M'+N+' -2 L'+N+' '+W+' L-2 '+W
+         :                  'M'+N+' -2 L'+N+' '+O+' L102 '+O;
+  } else if(a.van==='west'){       // rijdt naar het oosten
+    lbl = [12, O];
+    app  = 'M-2 '+O+' L30 '+O;
+    full = naar==='rd'    ? 'M-2 '+O+' L102 '+O
+         : naar==='rechts'? 'M-2 '+O+' L'+N+' '+O+' L'+N+' 102'
+         :                  'M-2 '+O+' L'+Z+' '+O+' L'+Z+' -2';
+  } else if(a.van==='oost'){       // rijdt naar het westen
+    lbl = [88, W];
+    app  = 'M102 '+W+' L70 '+W;
+    full = naar==='rd'    ? 'M102 '+W+' L-2 '+W
+         : naar==='rechts'? 'M102 '+W+' L'+Z+' '+W+' L'+Z+' -2'
+         :                  'M102 '+W+' L'+N+' '+W+' L'+N+' 102';
+  } else if(a.van==='uitrit'){
+    lbl = [50, 88];
+    app  = 'M50 102 L50 76';
+    full = 'M50 102 L50 54 L102 54';
+  } else {                          // voetganger op het trottoir langs de uitrit
+    lbl = [16, 58];
+    app  = 'M-2 65 L34 65';
+    full = 'M-2 65 L102 65';
+  }
+  return {full:full, app:app, lbl:lbl};
+}
+function actorVorm(a){
+  var kl = a.kleur==='jij' ? '#f2c200'
+         : a.soort==='tram' ? '#d2272e'
+         : a.soort==='fiets' ? '#4bd08a'
+         : a.soort==='voet' ? '#ffffff' : '#9fd0ff';
+  // Alles wijst naar +x, zodat rotate="auto" de richting van de route volgt.
+  if(a.soort==='voet')  return '<circle cx="0" cy="-3" r="2.6" fill="'+kl+'"/><rect x="-2" y="0" width="4" height="6.5" rx="1.6" fill="'+kl+'"/>';
+  if(a.soort==='fiets') return '<circle cx="-3" cy="2" r="2.6" fill="none" stroke="'+kl+'" stroke-width="1.2"/><circle cx="3" cy="2" r="2.6" fill="none" stroke="'+kl+'" stroke-width="1.2"/><path d="M-3 2 0 -3h3" stroke="'+kl+'" stroke-width="1.2" fill="none"/>';
+  if(a.soort==='tram')  return '<rect x="-8" y="-3.5" width="16" height="7" rx="1.5" fill="'+kl+'"/><rect x="2" y="-2.3" width="4" height="4.6" fill="#fff"/>';
+  return '<rect x="-6" y="-3.4" width="12" height="6.8" rx="2" fill="'+kl+'"/><rect x="0.6" y="-2.4" width="3.6" height="4.8" rx="1" fill="#1a2330" opacity=".55"/>';
+}
+var GEEN_BEWEGING = false;
+try{ GEEN_BEWEGING = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+
+function sceneSVG(sc, mode, volgorde){
+  var bewegend = !GEEN_BEWEGING;
+  var s='<svg viewBox="0 0 100 100" class="scene" role="img" aria-label="Verkeerssituatie op een kruispunt">';
+  if(sc.type==='uitrit'){
+    s+='<rect x="0" y="36" width="100" height="24" fill="#4a5361"/>';
+    s+='<rect x="0" y="60" width="100" height="9" fill="#b9c0cb"/>';   // trottoir
+    s+='<rect x="42" y="69" width="16" height="31" fill="#6b7382"/>';  // uitrit
+    s+='<path d="M0 48h100" stroke="#fff" stroke-width="1" stroke-dasharray="6 5"/>';
+  } else {
+    s+='<rect x="0" y="36" width="100" height="28" fill="#4a5361"/>';
+    s+='<rect x="36" y="0" width="28" height="100" fill="#4a5361"/>';
+    s+='<path d="M0 50h30M70 50h30" stroke="#fff" stroke-width="1.2" stroke-dasharray="6 5"/>';
+    s+='<path d="M50 0v30M50 70v30" stroke="#fff" stroke-width="1.2" stroke-dasharray="6 5"/>';
+    if(sc.borden==='haaientanden-zuid'){
+      for(var i=0;i<6;i++){ var x=37.5+i*4.5; s+='<path d="M'+x+' 69 L'+(x+3)+' 69 L'+(x+1.5)+' 65.5 Z" fill="#fff"/>'; }
+    }
+  }
+  var acts = sc.actors||[];
+  acts.forEach(function(a){
+    var r=route(a), vorm=actorVorm(a);
+    if(!bewegend){
+      // Zonder beweging: iedereen staat stil vlak voor het kruispunt.
+      s+='<g><path d="'+r.app+'" fill="none" stroke="none"/>'+vorm+
+         '<animateMotion dur="0.001s" fill="freeze" rotate="auto" path="'+r.app+'" keyPoints="1;1" keyTimes="0;1" calcMode="linear"/></g>';
+    } else if(mode==='solve'){
+      var i = (volgorde||[]).indexOf(a.id); if(i<0) i = acts.length;
+      s+='<g>'+vorm+'<animateMotion begin="'+(i*1.5)+'s" dur="1.5s" fill="freeze" rotate="auto" path="'+r.full+'"/>'+
+         '<animateMotion dur="0.001s" fill="freeze" rotate="auto" path="'+r.app+'" keyPoints="1;1" keyTimes="0;1" calcMode="linear"/></g>';
+    } else {
+      s+='<g>'+vorm+'<animateMotion dur="2.6s" begin="0s" repeatCount="indefinite" rotate="auto" path="'+r.app+'"/></g>';
+    }
+    s+='<text x="'+r.lbl[0]+'" y="'+r.lbl[1]+'" text-anchor="middle" fill="#fff" stroke="#2a3140" stroke-width="2.2" paint-order="stroke" font-family="Archivo, Arial" font-weight="800" font-size="6">'+esc(a.label)+'</text>';
+  });
+  s+='</svg>';
+  return s;
+}
+
+/* ======================= BATTLE PASS ======================= */
+var PASS=[];
+(function(){
+  var belonging=[
+    ['🔰','Startbewijs'],['🪧','Bordenkijker'],['↗️','Voorsorteerder'],['🟡','Gele ruit'],['🦈','Haaientandjes'],
+    ['🚦','Lichtkenner'],['🔄','Rotonde-ridder'],['🅿️','Parkeerkunstenaar'],['🚌','Busvriend'],['🚑','Voorrangsvoertuig'],
+    ['🌙','Nachtthema'],['🚲','Fietsbewust'],['🛑','Stopteken'],['📐','Kruispuntmeter'],['🏁','Halverwege'],
+    ['🧭','Wegwijzer'],['🚧','Werk in uitvoering'],['❄️','Winterbanden'],['🪞','Spiegelmeester'],['⛽','Zuinige rijder'],
+    ['🛞','Bandenspanning'],['🧯','Noodkenner'],['📏','Twee seconden'],['🚓','Wetskenner'],['🧰','Voertuigkennis'],
+    ['🌟','Goudstatus'],['🧠','Theoriekop'],['🏅','Proefexamenheld'],['👑','Kruispuntkoning'],['🎓','Examenklaar']
+  ];
+  for(var i=0;i<30;i++) PASS.push({tier:i+1, xp:(i+1)*120, ic:belonging[i][0], nm:belonging[i][1]});
+})();
+function passTier(){ var t=0; PASS.forEach(function(p){ if(S.xp>=p.xp) t=p.tier; }); return t; }
+
+/* ======================= DAGPLAN ======================= */
+var DAGPLAN=[];
+(function(){
+  var mIds=MODULES.map(function(m){return m.id});
+  for(var d=1; d<=14; d++){
+    if(d<=10){
+      var m=mIds[(d-1)%mIds.length];
+      DAGPLAN.push({dag:d, mod:m, taken:['les','quiz','borden','puzzel']});
+    } else {
+      DAGPLAN.push({dag:d, mod:null, taken:['examen','fouten']});
+    }
+  }
+})();
+function huidigeDag(){ for(var i=1;i<=14;i++) if(!S.dagenGedaan[i]) return i; return 14; }
+
+/* ======================= LEITNER (flashcards) ======================= */
+function bakVan(c){ return S.leitner[c]||1; }
+function leitnerStapel(){
+  var r=SIGNS.slice().sort(function(a,b){ return bakVan(a.c)-bakVan(b.c) || (Math.random()-.5); });
+  return r.slice(0,20);
+}
+
+/* ======================= VIEWS ======================= */
+var TAB='vandaag';
+var TABS=[
+  {id:'vandaag', nm:'Vandaag', ic:'<path d="M3 9h18M7 3v4M17 3v4"/><rect x="3" y="5" width="18" height="16" rx="2"/>'},
+  {id:'leren',   nm:'Leren',   ic:'<path d="M4 5a2 2 0 012-2h12a2 2 0 012 2v16l-8-4-8 4z"/>'},
+  {id:'borden',  nm:'Borden',  ic:'<path d="M12 2l9 9-9 9-9-9z"/><path d="M12 8v4M12 15h.01"/>'},
+  {id:'examen',  nm:'Examen',  ic:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'},
+  {id:'pass',    nm:'Pass',    ic:'<path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6L12 16.8 6.7 19.6l1.1-6L3.4 9.4l6-.8z"/>'}
+];
+function kopBij(){
+  var L=levelInfo();
+  $('#lvl').textContent=L.n; $('#lvlnm').textContent=L.naam;
+  $('#xptxt').textContent=S.xp+' / '+L.boven+' XP';
+  $('#xpbar').style.width=Math.min(100,Math.round(L.in/L.nodig*100))+'%';
+  $('#streak').textContent=S.streak;
+}
+function tekenNav(){
+  var n=$('#nav'); n.innerHTML='';
+  TABS.forEach(function(t){
+    var b=el('button','tab'); b.setAttribute('aria-selected', TAB===t.id?'true':'false'); b.type='button';
+    b.innerHTML='<svg viewBox="0 0 24 24">'+t.ic+'</svg>'; b.appendChild(el('span',null,t.nm));
+    b.onclick=function(){ TAB=t.id; teken(); $('#main').scrollTop=0; };
+    n.appendChild(b);
+  });
+}
+function teken(){
+  kopBij(); tekenNav();
+  var v=$('#view'); v.innerHTML='';
+  ({vandaag:vVandaag, leren:vLeren, borden:vBorden, examen:vExamen, pass:vPass}[TAB]||vVandaag)(v);
+}
+
+/* ---------- VANDAAG ---------- */
+function vVandaag(v){
+  var dag=huidigeDag(), plan=DAGPLAN[dag-1];
+  var h=el('div','stack');
+  var top=el('div','card stack');
+  top.appendChild(el('div','eyebrow','Dag '+dag+' van 14'));
+  top.appendChild(el('h2', null, dag<=10 ? ('Module: '+(MODULES.filter(function(m){return m.id===plan.mod})[0]||{}).titel) : 'Herhalen en proefexamen'));
+  top.appendChild(el('div','small muted', dag<=10 ? 'Lees de kaartjes, maak de quiz en de puzzel. Reken op 30 tot 45 minuten.' : 'Maak elke dag een proefexamen en werk je foutenbak weg.'));
+  var pb=el('div','bar'); var pi=el('i'); pi.style.width=Math.round((dag-1)/14*100)+'%'; pb.appendChild(pi); top.appendChild(pb);
+  h.appendChild(top);
+
+  var acties=el('div','stack');
+  if(dag<=10){
+    var mod=MODULES.filter(function(m){return m.id===plan.mod})[0];
+    if(mod){
+      acties.appendChild(knopKaart('Lesstof lezen', mod.lessons.length+' kaartjes · '+mod.titel, function(){ startLes(mod); }));
+      acties.appendChild(knopKaart('Quiz', '10 vragen uit '+mod.titel, function(){ startQuiz(schud(mod.questions).slice(0,10), 'Quiz · '+mod.titel); }));
+      acties.appendChild(knopKaart('Flashcards borden', '20 borden volgens het Leitner-systeem', function(){ TAB='borden'; teken(); startFlash(); }));
+      if(mod.puzzles.length) acties.appendChild(knopKaart('Situatiepuzzel', mod.puzzles.length+' kruispunten', function(){ startPuzzels(mod); }));
+    }
+  } else {
+    acties.appendChild(knopKaart('Proefexamen', EXAM.vragen+' vragen · '+EXAM.minuten+' minuten · '+EXAM.grens+' goed om te slagen', function(){ TAB='examen'; teken(); startExamen(); }));
+  }
+  if(S.fout.length) acties.appendChild(knopKaart('Foutenbak wegwerken', S.fout.length+' vragen die je fout had', function(){
+    startQuiz(S.fout.map(vraagById).filter(Boolean).slice(0,15), 'Foutenbak'); }));
+  h.appendChild(acties);
+
+  var klaar=el('div','card stack');
+  klaar.appendChild(el('div','eyebrow','Dag afronden'));
+  klaar.appendChild(el('div','small muted','Vink de dag af als je klaar bent. Je krijgt 50 XP en je reeks loopt door.'));
+  var kb=el('button','btn wide', S.dagenGedaan[dag]?'Dag '+dag+' is afgerond':'Dag '+dag+' afronden');
+  kb.disabled=!!S.dagenGedaan[dag];
+  kb.onclick=function(){ S.dagenGedaan[dag]=1; dagBij(); geefXP(50,'dag afgerond'); bewaar(); teken(); };
+  klaar.appendChild(kb);
+  h.appendChild(klaar);
+
+  var st=el('div','card stack');
+  st.appendChild(el('div','eyebrow','Hoe sta je ervoor'));
+  var rij=el('div','grid g-mod');
+  MODULES.forEach(function(m){ rij.appendChild(modStatKaart(m)); });
+  st.appendChild(rij);
+  var bron_r=el('div','art', bron==='account'?'Voortgang staat in je account en werkt op elk apparaat.':'Voortgang staat in deze browser.');
+  st.appendChild(bron_r);
+  h.appendChild(st);
+  v.appendChild(h);
+}
+function knopKaart(titel, sub, fn){
+  var b=el('button','card modcard'); b.style.setProperty('--c','var(--blauw)'); b.type='button';
+  var box=el('div'); box.style.flex='1'; box.appendChild(el('div',null,titel)); box.querySelector('div').style.fontWeight='600';
+  box.appendChild(el('div','small muted',sub));
+  b.appendChild(box); b.appendChild(el('div','muted','›')); b.querySelector('div:last-child').style.fontSize='22px';
+  b.onclick=fn; return b;
+}
+function modStatKaart(m){
+  var st=S.mod[m.id]||{goed:0,fout:0}, tot=st.goed+st.fout;
+  var pct = tot? Math.round(st.goed/tot*100):0;
+  var medaille = tot<10 ? '—' : pct>=90?'Goud':pct>=75?'Zilver':pct>=60?'Brons':'Oefenen';
+  var b=el('button','card modcard'); b.type='button'; b.style.setProperty('--c','var('+m.kleur+')');
+  var r=36, C=2*Math.PI*r;
+  var ring='<svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="'+r+'" fill="none" stroke="var(--surface-2)" stroke-width="13"/>'+
+    '<circle cx="50" cy="50" r="'+r+'" fill="none" stroke="var('+m.kleur+')" stroke-width="13" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+(C-C*pct/100)+'" transform="rotate(-90 50 50)"/></svg>';
+  var rr=el('div'); rr.innerHTML=ring; rr.style.flex='0 0 auto'; b.appendChild(rr.firstChild);
+  var box=el('div'); box.style.flex='1'; box.style.minWidth='0';
+  var t=el('div',null,m.titel); t.style.fontWeight='600'; box.appendChild(t);
+  box.appendChild(el('div','small muted', tot? (st.goed+' goed van '+tot+' · '+medaille) : 'nog niet geoefend'));
+  b.appendChild(box);
+  b.onclick=function(){ TAB='leren'; teken(); };
+  return b;
+}
+
+/* ---------- LEREN ---------- */
+function vLeren(v){
+  var h=el('div','stack');
+  h.appendChild(el('h2',null,'Leren'));
+  h.appendChild(el('div','small muted','Kies een module. Je leest eerst de kaartjes en maakt daarna de quiz.'));
+  MODULES.forEach(function(m){
+    var c=el('div','card stack');
+    c.appendChild(el('div','eyebrow','Module '+m.nr));
+    c.appendChild(el('h3',null,m.titel));
+    c.appendChild(el('div','small muted',m.samenvatting));
+    var row=el('div'); row.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+    var b1=el('button','btn sec','Lesstof ('+m.lessons.length+')'); b1.onclick=function(){startLes(m)};
+    var b2=el('button','btn','Quiz ('+m.questions.length+')'); b2.onclick=function(){startQuiz(schud(m.questions),'Quiz · '+m.titel)};
+    row.appendChild(b1); row.appendChild(b2);
+    if(m.puzzles.length){ var b3=el('button','btn sec','Puzzels ('+m.puzzles.length+')'); b3.onclick=function(){startPuzzels(m)}; row.appendChild(b3); }
+    c.appendChild(row);
+    h.appendChild(c);
+  });
+  v.appendChild(h);
+}
+function startLes(m){
+  var i=0;
+  function toon(){
+    var v=$('#view'); v.innerHTML='';
+    var L=m.lessons[i];
+    var h=el('div','stack');
+    var pr=el('div','prog'); pr.appendChild(el('span',null,(i+1)+' / '+m.lessons.length));
+    var bar=el('div','bar'); var bi=el('i'); bi.style.width=Math.round((i+1)/m.lessons.length*100)+'%'; bar.appendChild(bi); pr.appendChild(bar);
+    h.appendChild(pr);
+    var c=el('div','card stack');
+    c.appendChild(el('div','eyebrow',m.titel));
+    c.appendChild(el('h3',null,L.t));
+    c.appendChild(el('div',null,L.b));
+    c.appendChild(el('div','art',L.a));
+    h.appendChild(c);
+    var row=el('div'); row.style.cssText='display:flex;gap:8px';
+    var vb=el('button','btn sec','Terug'); vb.disabled=i===0; vb.onclick=function(){i--;toon()};
+    var nb=el('button','btn','Volgende'); nb.style.flex='1';
+    nb.textContent = i===m.lessons.length-1 ? 'Klaar · quiz starten' : 'Volgende';
+    nb.onclick=function(){
+      if(i===m.lessons.length-1){ S.mod[m.id].les=m.lessons.length; geefXP(15,'lesstof gelezen'); bewaar();
+        startQuiz(schud(m.questions).slice(0,10),'Quiz · '+m.titel); }
+      else { i++; toon(); }
+    };
+    row.appendChild(vb); row.appendChild(nb); h.appendChild(row);
+    var ab=el('button','btn sec wide','Terug naar overzicht'); ab.onclick=function(){teken()};
+    h.appendChild(ab);
+    v.appendChild(h); $('#main').scrollTop=0;
+  }
+  toon();
+}
+
+/* ---------- QUIZ ---------- */
+function startQuiz(lijst, titel){
+  if(!lijst||!lijst.length){ toast('Geen vragen beschikbaar'); return; }
+  var i=0, goed=0;
+  function toon(){
+    var v=$('#view'); v.innerHTML='';
+    var h=el('div','stack');
+    var pr=el('div','prog');
+    pr.appendChild(el('span','tnum',(i+1)+' / '+lijst.length));
+    var bar=el('div','bar'); var bi=el('i'); bi.style.width=Math.round(i/lijst.length*100)+'%'; bar.appendChild(bi); pr.appendChild(bar);
+    pr.appendChild(el('span','tnum',goed+' goed'));
+    h.appendChild(pr);
+    h.appendChild(toonVraag(lijst[i], {kop:titel, next:function(ok){ if(ok)goed++; i++; if(i<lijst.length) toon(); else eind(); }}));
+    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){teken()};
+    h.appendChild(ab);
+    v.appendChild(h); $('#main').scrollTop=0;
+  }
+  function eind(){
+    var v=$('#view'); v.innerHTML='';
+    var pct=Math.round(goed/lijst.length*100);
+    var h=el('div','stack');
+    var c=el('div','card stack'); c.style.textAlign='center';
+    c.appendChild(el('div','eyebrow',titel));
+    c.appendChild(el('div','score tnum',goed+'/'+lijst.length));
+    c.appendChild(el('div','muted',pct>=88?'Dit is examenniveau.':pct>=70?'Bijna goed. Herhaal je fouten.':'Lees de lesstof nog een keer door.'));
+    if(pct===100) { geefXP(30,'foutloos'); c.appendChild(el('div','pill','Foutloos · bonus 30 XP')); }
+    h.appendChild(c);
+    if(S.fout.length){
+      var fb=el('button','btn wide','Foutenbak oefenen ('+S.fout.length+')');
+      fb.onclick=function(){ startQuiz(S.fout.map(vraagById).filter(Boolean).slice(0,15),'Foutenbak'); };
+      h.appendChild(fb);
+    }
+    var ab=el('button','btn sec wide','Terug naar overzicht'); ab.onclick=function(){teken()}; h.appendChild(ab);
+    v.appendChild(h); $('#main').scrollTop=0; dagBij();
+  }
+  toon();
+}
+
+/* ---------- PUZZELS ---------- */
+function startPuzzels(m){
+  var lijst=schud(m.puzzles), i=0, goed=0;
+  function toon(){
+    var v=$('#view'); v.innerHTML='';
+    var P=lijst[i], gekozen=[], klaar=false;
+    var h=el('div','stack');
+    var pr=el('div','prog'); pr.appendChild(el('span','tnum',(i+1)+' / '+lijst.length));
+    var bar=el('div','bar'); var bi=el('i'); bi.style.width=Math.round(i/lijst.length*100)+'%'; bar.appendChild(bi); pr.appendChild(bar);
+    h.appendChild(pr);
+    var c=el('div','card stack');
+    c.appendChild(el('div','eyebrow','Situatiepuzzel · '+m.titel));
+    var sc=el('div'); sc.innerHTML=sceneSVG(P.scene,'approach'); c.appendChild(sc);
+    c.appendChild(el('div',null,P.v));
+    var wrap=el('div','stack'); wrap.style.gap='8px'; c.appendChild(wrap);
+    var knoppen=[];
+    P.scene.actors.forEach(function(a){
+      var b=el('button','actorbtn'); var n=el('span','num',''); n.style.visibility='hidden';
+      b.appendChild(n); b.appendChild(el('span',null,a.label+(a.soort?' ('+a.soort+')':'')));
+      b.onclick=function(){ if(klaar)return;
+        var p=gekozen.indexOf(a.id); if(p>=0) gekozen.splice(p,1); else gekozen.push(a.id);
+        knoppen.forEach(function(kb,ki){ var id=P.scene.actors[ki].id, pos=gekozen.indexOf(id);
+          kb.dataset.st=pos<0?'':'sel'; var nn=kb.querySelector('.num');
+          if(pos<0){nn.style.visibility='hidden';nn.textContent='';}else{nn.style.visibility='visible';nn.textContent=pos+1;} });
+        ok.disabled = gekozen.length!==P.scene.actors.length; };
+      knoppen.push(b); wrap.appendChild(b);
+    });
+    var ok=el('button','btn wide','Controleer'); ok.disabled=true;
+    ok.onclick=function(){ if(klaar)return; klaar=true;
+      var g2 = gekozen.length===P.a.length && gekozen.every(function(x,k){return x===P.a[k]});
+      knoppen.forEach(function(kb){kb.disabled=true});
+      // Speel de juiste volgorde af, zodat je ziet wat er had moeten gebeuren.
+      sc.innerHTML=sceneSVG(P.scene,'solve',P.a);
+      var fb=el('div','fb '+(g2?'goed':'fout'));
+      fb.appendChild(el('h4',null,g2?'Goed':'Fout'));
+      var naam={}; P.scene.actors.forEach(function(a){ naam[a.id]=a.label; });
+      fb.appendChild(el('div','small muted','Hierboven rijden ze in de juiste volgorde: '+
+        P.a.map(function(id){ return naam[id]||id; }).join(' → ')));
+      fb.appendChild(el('div','small',P.u));
+      fb.appendChild(el('div','art',P.art));
+      c.appendChild(fb); ok.remove();
+      if(g2){ goed++; geefXP(15,'puzzel'); }
+      var nb=el('button','btn wide', i===lijst.length-1?'Klaar':'Volgende puzzel');
+      nb.onclick=function(){ i++; if(i<lijst.length) toon(); else { toast('Puzzels: '+goed+' van '+lijst.length+' goed'); dagBij(); teken(); } };
+      c.appendChild(nb); nb.focus();
+    };
+    c.appendChild(ok);
+    h.appendChild(c);
+    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){teken()}; h.appendChild(ab);
+    v.appendChild(h); $('#main').scrollTop=0;
+  }
+  toon();
+}
+
+/* ---------- BORDEN ---------- */
+function vBorden(v){
+  var h=el('div','stack');
+  h.appendChild(el('h2',null,'Borden'));
+  var bakken=[0,0,0,0,0,0];
+  SIGNS.forEach(function(s){ bakken[bakVan(s.c)]++; });
+  var c=el('div','card stack');
+  c.appendChild(el('div','eyebrow','Leitner · 5 bakjes'));
+  c.appendChild(el('div','small muted','Een bord dat je goed hebt schuift een bakje op en komt daarna minder vaak terug. Fout? Terug naar bakje 1.'));
+  var row=el('div'); row.style.cssText='display:flex;gap:6px';
+  for(var b=1;b<=5;b++){ var p=el('div','pill','Bakje '+b+': '+bakken[b]); row.appendChild(p); }
+  c.appendChild(row);
+  var fb=el('button','btn wide','Flashcards starten (20 borden)'); fb.onclick=startFlash; c.appendChild(fb);
+  var qb=el('button','btn sec wide','Bordenquiz (betekenis → bord)'); qb.onclick=startBordQuiz; c.appendChild(qb);
+  h.appendChild(c);
+
+  var g2=el('div','card stack');
+  g2.appendChild(el('div','eyebrow','Alle '+SIGNS.length+' borden'));
+  var grid=el('div','grid g-sign');
+  SIGNS.forEach(function(s){
+    var t=el('button','signtile'); t.type='button';
+    t.innerHTML=bordSVG(s,52);
+    t.appendChild(el('div','code',s.c));
+    t.onclick=function(){ bordDetail(s); };
+    grid.appendChild(t);
+  });
+  g2.appendChild(grid);
+  h.appendChild(g2);
+  v.appendChild(h);
+}
+function bordDetail(s){
+  var v=$('#view'); v.innerHTML='';
+  var h=el('div','stack');
+  var c=el('div','card stack'); c.style.textAlign='center';
+  var sv=el('div'); sv.innerHTML=bordSVG(s,130); c.appendChild(sv);
+  c.appendChild(el('div','eyebrow',s.c));
+  c.appendChild(el('h3',null,s.n));
+  c.appendChild(el('div','muted',s.b));
+  c.appendChild(el('div','pill','Bakje '+bakVan(s.c)));
+  h.appendChild(c);
+  var ab=el('button','btn wide','Terug naar borden'); ab.onclick=function(){teken()}; h.appendChild(ab);
+  v.appendChild(h); $('#main').scrollTop=0;
+}
+function startFlash(){
+  var stapel=leitnerStapel(), i=0, goed=0;
+  function toon(){
+    var v=$('#view'); v.innerHTML='';
+    var s=stapel[i], open=false;
+    var h=el('div','stack');
+    var pr=el('div','prog'); pr.appendChild(el('span','tnum',(i+1)+' / '+stapel.length));
+    var bar=el('div','bar'); var bi=el('i'); bi.style.width=Math.round(i/stapel.length*100)+'%'; bar.appendChild(bi); pr.appendChild(bar);
+    pr.appendChild(el('span','pill','Bakje '+bakVan(s.c)));
+    h.appendChild(pr);
+    var c=el('div','card stack'); c.style.textAlign='center';
+    var sv=el('div'); sv.innerHTML=bordSVG(s,130); c.appendChild(sv);
+    var ant=el('div','stack'); ant.hidden=true;
+    ant.appendChild(el('div','eyebrow',s.c));
+    ant.appendChild(el('h3',null,s.n));
+    ant.appendChild(el('div','small muted',s.b));
+    c.appendChild(ant);
+    var draai=el('button','btn wide','Toon betekenis');
+    var keuzes=el('div'); keuzes.style.cssText='display:flex;gap:8px'; keuzes.hidden=true;
+    var fout=el('button','btn sec','Wist ik niet'); fout.style.flex='1';
+    var ok=el('button','btn','Wist ik'); ok.style.flex='1';
+    keuzes.appendChild(fout); keuzes.appendChild(ok);
+    draai.onclick=function(){ open=true; ant.hidden=false; draai.hidden=true; keuzes.hidden=false; };
+    function verder(wist){
+      S.leitner[s.c] = wist ? Math.min(5, bakVan(s.c)+1) : 1;
+      if(wist){ goed++; geefXP(5,'bord'); }
+      bewaar(); i++;
+      if(i<stapel.length) toon(); else {
+        var v2=$('#view'); v2.innerHTML='';
+        var e=el('div','stack'); var cc=el('div','card stack'); cc.style.textAlign='center';
+        cc.appendChild(el('div','eyebrow','Flashcards'));
+        cc.appendChild(el('div','score tnum',goed+'/'+stapel.length));
+        cc.appendChild(el('div','muted','Borden die je niet wist komen morgen weer terug.'));
+        e.appendChild(cc);
+        var ab2=el('button','btn wide','Terug'); ab2.onclick=function(){TAB='borden';teken()}; e.appendChild(ab2);
+        v2.appendChild(e); dagBij();
+      }
+    }
+    ok.onclick=function(){verder(true)}; fout.onclick=function(){verder(false)};
+    c.appendChild(draai); c.appendChild(keuzes);
+    h.appendChild(c);
+    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){TAB='borden';teken()}; h.appendChild(ab);
+    v.appendChild(h); $('#main').scrollTop=0;
+  }
+  toon();
+}
+function startBordQuiz(){
+  var pool=schud(SIGNS).slice(0,12);
+  var vragen=pool.map(function(s){
+    var fout=schud(SIGNS.filter(function(x){return x.c!==s.c})).slice(0,3);
+    var opts=schud([s].concat(fout));
+    return {t:'mcBord', s:s, o:opts};
+  });
+  var i=0, goed=0;
+  function toon(){
+    var v=$('#view'); v.innerHTML='';
+    var Q=vragen[i], klaar=false;
+    var h=el('div','stack');
+    var pr=el('div','prog'); pr.appendChild(el('span','tnum',(i+1)+' / '+vragen.length));
+    var bar=el('div','bar'); var bi=el('i'); bi.style.width=Math.round(i/vragen.length*100)+'%'; bar.appendChild(bi); pr.appendChild(bar);
+    h.appendChild(pr);
+    var c=el('div','card stack');
+    c.appendChild(el('div','eyebrow','Bordenquiz'));
+    c.appendChild(el('h3',null,Q.s.n));
+    var grid=el('div','grid g-sign');
+    Q.o.forEach(function(o){
+      var t=el('button','signtile'); t.type='button'; t.innerHTML=bordSVG(o,56); t.appendChild(el('div','code',o.c));
+      t.onclick=function(){ if(klaar)return; klaar=true;
+        var g2=(o.c===Q.s.c);
+        Array.prototype.forEach.call(grid.children,function(ch,ix){ ch.disabled=true;
+          if(Q.o[ix].c===Q.s.c) ch.style.borderColor='var(--goed)'; });
+        if(!g2) t.style.borderColor='var(--fout)';
+        S.leitner[Q.s.c] = g2 ? Math.min(5,bakVan(Q.s.c)+1) : 1;
+        if(g2){goed++; geefXP(8,'bord');} bewaar();
+        var fb=el('div','fb '+(g2?'goed':'fout'));
+        fb.appendChild(el('h4',null,g2?'Goed':'Fout · dit is '+Q.s.c));
+        fb.appendChild(el('div','small',Q.s.b));
+        c.appendChild(fb);
+        var nb=el('button','btn wide', i===vragen.length-1?'Klaar':'Volgende');
+        nb.onclick=function(){ i++; if(i<vragen.length) toon(); else { toast('Bordenquiz: '+goed+'/'+vragen.length); dagBij(); TAB='borden'; teken(); } };
+        c.appendChild(nb); nb.focus();
+      };
+      grid.appendChild(t);
+    });
+    c.appendChild(grid);
+    h.appendChild(c);
+    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){TAB='borden';teken()}; h.appendChild(ab);
+    v.appendChild(h); $('#main').scrollTop=0;
+  }
+  toon();
+}
+
+/* ---------- EXAMEN ---------- */
+var examState=null, examTimer=null;
+function vExamen(v){
+  if(examState && !examState.klaar){ tekenExamen(v); return; }
+  var h=el('div','stack');
+  h.appendChild(el('h2',null,'Proefexamen'));
+  var c=el('div','card stack');
+  c.appendChild(el('div','eyebrow','Zoals het echte examen'));
+  c.appendChild(el('div',null, EXAM.vragen+' vragen in '+EXAM.minuten+' minuten. Je slaagt bij '+EXAM.grens+' goede antwoorden. Tijdens het examen krijg je geen feedback; je kunt vragen markeren en terugbladeren.'));
+  var beschikbaar=ALLE.length;
+  if(beschikbaar<EXAM.vragen) c.appendChild(el('div','small muted','Let op: de proefversie heeft '+beschikbaar+' vragen. Het examen gebruikt er '+Math.min(EXAM.vragen,beschikbaar)+' en herhaalt niets. Zodra alle 8 modules klaar zijn, zijn het er '+EXAM.vragen+'.'));
+  var b=el('button','btn wide','Examen starten'); b.onclick=startExamen; c.appendChild(b);
+  h.appendChild(c);
+  if(S.examens.length){
+    var r=el('div','card stack');
+    r.appendChild(el('div','eyebrow','Eerdere pogingen'));
+    var tb=el('table','res');
+    S.examens.slice().reverse().slice(0,8).forEach(function(e){
+      var tr=document.createElement('tr');
+      var td1=document.createElement('td'); td1.textContent=e.datum+(e.gezakt?' · gezakt':' · geslaagd');
+      var td2=document.createElement('td'); td2.textContent=e.goed+'/'+e.totaal;
+      tr.appendChild(td1); tr.appendChild(td2); tb.appendChild(tr);
+    });
+    r.appendChild(tb); h.appendChild(r);
+  }
+  v.appendChild(h);
+}
+function startExamen(){
+  var n=Math.min(EXAM.vragen, ALLE.length);
+  examState={ vragen:schud(ALLE).slice(0,n), i:0, ant:{}, mark:{}, eind:Date.now()+EXAM.minuten*60000, klaar:false };
+  TAB='examen';
+  clearInterval(examTimer);
+  examTimer=setInterval(function(){
+    if(!examState||examState.klaar){ clearInterval(examTimer); return; }
+    var over=examState.eind-Date.now();
+    var t=$('#examtimer');
+    if(t){ t.textContent=tijd(over); t.classList.toggle('laag', over<120000); }
+    if(over<=0){ clearInterval(examTimer); eindExamen(); }
+  },1000);
+  teken();
+}
+function tijd(ms){ if(ms<0)ms=0; var s=Math.floor(ms/1000); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+function tekenExamen(v){
+  var E=examState, q=E.vragen[E.i];
+  var h=el('div','stack');
+  var top=el('div','examtop');
+  top.appendChild(el('div','eyebrow','Vraag '+(E.i+1)+' van '+E.vragen.length));
+  var t=el('div','timer tnum',tijd(E.eind-Date.now())); t.id='examtimer'; top.appendChild(t);
+  h.appendChild(top);
+
+  var c=el('div','card stack');
+  if(q.t==='sign'&&q.signCode){ var sg=SIGNS.filter(function(s){return s.c===q.signCode})[0];
+    if(sg){ var hold=el('div'); hold.style.textAlign='center'; hold.innerHTML=bordSVG(sg,110); c.appendChild(hold); } }
+  var vr=el('h3',null,q.v); vr.style.fontSize='17px'; c.appendChild(vr);
+  var ow=el('div','stack'); ow.style.gap='8px'; c.appendChild(ow);
+  var huidig=E.ant[E.i];
+
+  function zet(val){ E.ant[E.i]=val; teken(); }
+  if(q.t==='jn'){
+    ['Ja','Nee'].forEach(function(lab,i){ var b=el('button','opt',lab);
+      if(huidig===i) b.dataset.st='sel'; b.onclick=function(){zet(i)}; ow.appendChild(b); });
+  } else if(q.t==='mc'||q.t==='sign'){
+    q.o.forEach(function(lab,i){ var b=el('button','opt',lab);
+      if(huidig===i) b.dataset.st='sel'; b.onclick=function(){zet(i)}; ow.appendChild(b); });
+  } else if(q.t==='multi'){
+    c.insertBefore(el('div','small muted','Meerdere antwoorden zijn goed.'), ow);
+    var cur=Array.isArray(huidig)?huidig.slice():[];
+    q.o.forEach(function(lab,i){ var b=el('button','opt',lab);
+      if(cur.indexOf(i)>=0) b.dataset.st='sel';
+      b.onclick=function(){ var p=cur.indexOf(i); if(p<0)cur.push(i); else cur.splice(p,1); zet(cur.slice()); };
+      ow.appendChild(b); });
+  } else if(q.t==='order'){
+    c.insertBefore(el('div','small muted','Klik ze aan in de juiste volgorde.'), ow);
+    var cur2=Array.isArray(huidig)?huidig.slice():[];
+    q.o.forEach(function(lab,i){ var b=el('button','actorbtn');
+      var pos=cur2.indexOf(i); var n=el('span','num', pos<0?'':String(pos+1));
+      if(pos<0) n.style.visibility='hidden';
+      b.appendChild(n); b.appendChild(el('span',null,lab));
+      if(pos>=0) b.dataset.st='sel';
+      b.onclick=function(){ var p=cur2.indexOf(i); if(p<0)cur2.push(i); else cur2.splice(p,1); zet(cur2.slice()); };
+      ow.appendChild(b); });
+  } else if(q.t==='fill'){
+    var inp=document.createElement('input'); inp.type='text'; inp.id='exfill'+E.i; inp.placeholder='Typ je antwoord';
+    inp.value = typeof huidig==='string'?huidig:'';
+    inp.style.cssText='width:100%;padding:12px 14px;border-radius:11px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);font:inherit';
+    inp.oninput=function(){ E.ant[E.i]=inp.value; };
+    ow.appendChild(inp);
+  }
+  h.appendChild(c);
+
+  var row=el('div'); row.style.cssText='display:flex;gap:8px';
+  var vb=el('button','btn sec','Vorige'); vb.disabled=E.i===0; vb.onclick=function(){E.i--;teken()};
+  var mb=el('button','btn sec', E.mark[E.i]?'Markering weg':'Markeren');
+  mb.onclick=function(){ E.mark[E.i]=!E.mark[E.i]; teken(); };
+  var nb=el('button','btn','Volgende'); nb.style.flex='1'; nb.disabled=E.i===E.vragen.length-1;
+  nb.onclick=function(){E.i++;teken()};
+  row.appendChild(vb); row.appendChild(mb); row.appendChild(nb);
+  h.appendChild(row);
+
+  var dc=el('div','card stack');
+  dc.appendChild(el('div','eyebrow','Overzicht'));
+  var dots=el('div','dots');
+  E.vragen.forEach(function(_,i){
+    var d=el('button','dot',String(i+1)); d.type='button';
+    var beantwoord = E.ant[i]!==undefined && E.ant[i]!=='' && !(Array.isArray(E.ant[i])&&!E.ant[i].length);
+    d.dataset.st = E.mark[i]?'mark':(beantwoord?'done':'');
+    if(i===E.i){ d.style.outline='2px solid var(--fg)'; d.style.outlineOffset='1px'; }
+    d.onclick=function(){E.i=i;teken();$('#main').scrollTop=0};
+    dots.appendChild(d);
+  });
+  dc.appendChild(dots);
+  var aantal=Object.keys(E.ant).filter(function(k){var a=E.ant[k];return a!==undefined&&a!==''&&!(Array.isArray(a)&&!a.length)}).length;
+  dc.appendChild(el('div','small muted', aantal+' van '+E.vragen.length+' beantwoord'));
+  var ib=el('button','btn wide','Examen inleveren'); ib.onclick=function(){
+    eindExamen(); };
+  dc.appendChild(ib);
+  h.appendChild(dc);
+  v.appendChild(h);
+}
+function juist(q, ant){
+  if(ant===undefined) return false;
+  if(q.t==='jn'||q.t==='mc'||q.t==='sign') return ant===q.a;
+  if(q.t==='multi'){ if(!Array.isArray(ant)) return false;
+    var a=q.a.slice().sort(), k=ant.slice().sort();
+    return a.length===k.length && a.every(function(v,i){return v===k[i]}); }
+  if(q.t==='order'){ return Array.isArray(ant) && ant.length===q.a.length && ant.every(function(v,i){return v===q.a[i]}); }
+  if(q.t==='fill'){ var n=function(x){return (x||'').toLowerCase().replace(/[^a-z0-9]/g,'')}; return n(ant)!=='' && n(ant)===n(q.a); }
+  return false;
+}
+function eindExamen(){
+  clearInterval(examTimer);
+  var E=examState; if(!E||E.klaar) return;
+  E.klaar=true;
+  var goed=0, perMod={}, foutLijst=[];
+  E.vragen.forEach(function(q,i){
+    var ok=juist(q,E.ant[i]);
+    perMod[q.modTitel]=perMod[q.modTitel]||{g:0,t:0};
+    perMod[q.modTitel].t++;
+    if(ok){ goed++; perMod[q.modTitel].g++; S.fout=S.fout.filter(function(x){return x!==q.id}); }
+    else { foutLijst.push(q); if(S.fout.indexOf(q.id)<0) S.fout.push(q.id); }
+    var st=S.mod[q.mod]; if(st){ ok?st.goed++:st.fout++; }
+  });
+  var grens = Math.round(EXAM.grens/EXAM.vragen*E.vragen.length);
+  var geslaagd = goed>=grens;
+  S.examens.push({datum:vandaagStr(), goed:goed, totaal:E.vragen.length, gezakt:!geslaagd});
+  if(S.examens.length>25) S.examens=S.examens.slice(-25);
+  geefXP(geslaagd?100:40, 'proefexamen'); dagBij(); bewaar();
+
+  var v=$('#view'); v.innerHTML='';
+  var h=el('div','stack');
+  var c=el('div','card stack'); c.style.textAlign='center';
+  c.appendChild(el('div','eyebrow', geslaagd?'Geslaagd':'Gezakt'));
+  var sc=el('div','score tnum',goed+'/'+E.vragen.length); sc.style.color= geslaagd?'var(--goed)':'var(--fout)';
+  c.appendChild(sc);
+  c.appendChild(el('div','muted','Grens voor dit examen: '+grens+' goed'+(E.vragen.length!==EXAM.vragen?' (geschaald naar '+E.vragen.length+' vragen)':'')));
+  h.appendChild(c);
+
+  var a=el('div','card stack');
+  a.appendChild(el('div','eyebrow','Per onderwerp'));
+  var tb=el('table','res');
+  Object.keys(perMod).forEach(function(k){
+    var tr=document.createElement('tr');
+    var td1=document.createElement('td'); var p=Math.round(perMod[k].g/perMod[k].t*100);
+    td1.textContent=k+(p<75?' · zwak punt':'');
+    var td2=document.createElement('td'); td2.textContent=perMod[k].g+'/'+perMod[k].t;
+    tr.appendChild(td1); tr.appendChild(td2); tb.appendChild(tr);
+  });
+  a.appendChild(tb);
+  h.appendChild(a);
+
+  if(foutLijst.length){
+    var f=el('div','card stack');
+    f.appendChild(el('div','eyebrow','Je fouten ('+foutLijst.length+')'));
+    foutLijst.slice(0,12).forEach(function(q){
+      var d=el('div'); d.style.cssText='padding:9px 0;border-bottom:1px solid var(--line)';
+      d.appendChild(el('div','small',q.v));
+      var u=el('div','small muted',q.u); d.appendChild(u);
+      d.appendChild(el('div','art',q.art||''));
+      f.appendChild(d);
+    });
+    if(foutLijst.length>12) f.appendChild(el('div','small muted','En nog '+(foutLijst.length-12)+' andere. Ze staan in je foutenbak.'));
+    var ob=el('button','btn wide','Fouten direct oefenen');
+    ob.onclick=function(){ examState=null; startQuiz(foutLijst.slice(0,15),'Foutenbak'); };
+    f.appendChild(ob);
+    h.appendChild(f);
+  }
+  var ab=el('button','btn sec wide','Terug naar overzicht');
+  ab.onclick=function(){ examState=null; TAB='vandaag'; teken(); };
+  h.appendChild(ab);
+  v.appendChild(h); $('#main').scrollTop=0;
+}
+
+/* ---------- BATTLE PASS ---------- */
+function vPass(v){
+  var t=passTier();
+  var h=el('div','stack');
+  h.appendChild(el('h2',null,'Battle pass'));
+  var c=el('div','card stack');
+  c.appendChild(el('div','eyebrow','Tier '+t+' van 30'));
+  var volgende=PASS.filter(function(p){return p.xp>S.xp})[0];
+  c.appendChild(el('div','small muted', volgende ? ((volgende.xp-S.xp)+' XP tot tier '+volgende.tier+': '+volgende.nm) : 'Alles vrijgespeeld. Netjes.'));
+  var bar=el('div','bar'); var bi=el('i'); bi.style.width=Math.round(t/30*100)+'%'; bar.appendChild(bi); c.appendChild(bar);
+  h.appendChild(c);
+
+  var strip=el('div','pass');
+  PASS.forEach(function(p){
+    var d=el('div','tier'+(S.xp>=p.xp?' unlocked':''));
+    d.appendChild(el('div','n','TIER '+p.tier));
+    d.appendChild(el('div','ic',p.ic));
+    d.appendChild(el('div','nm',p.nm));
+    d.appendChild(el('div','art tnum',p.xp+' XP'));
+    strip.appendChild(d);
+  });
+  h.appendChild(strip);
+
+  var u=el('div','card stack');
+  u.appendChild(el('div','eyebrow','Uitdagingen'));
+  var uit=[
+    {nm:'Maak vandaag een quiz van 10 vragen', xp:10, klaar:S.laatsteDag===vandaagStr()},
+    {nm:'Werk je foutenbak leeg', xp:40, klaar:S.fout.length===0},
+    {nm:'Zet 10 borden in bakje 3 of hoger', xp:30, klaar:SIGNS.filter(function(s){return bakVan(s.c)>=3}).length>=10},
+    {nm:'Haal een proefexamen', xp:60, klaar:S.examens.some(function(e){return !e.gezakt})},
+    {nm:'Zeven dagen op rij leren', xp:70, klaar:S.streak>=7}
+  ];
+  uit.forEach(function(x){
+    var r=el('div'); r.style.cssText='display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)';
+    var l=el('div','small',(x.klaar?'✓ ':'○ ')+x.nm); if(x.klaar) l.style.color='var(--goed)';
+    r.appendChild(l); r.appendChild(el('div','art','+'+x.xp+' XP'));
+    u.appendChild(r);
+  });
+  h.appendChild(u);
+
+  var w=el('div','card stack');
+  w.appendChild(el('div','eyebrow','Let op'));
+  w.appendChild(el('div','small muted','Dit is zelfgemaakt lesmateriaal op basis van het RVV 1990, de WVW 1994 en de Regeling voertuigen. Het is geen officieel CBR-materiaal. Maak daarnaast de voorbeeldvragen van het CBR zelf.'));
+  h.appendChild(w);
+  v.appendChild(h);
+}
+
+/* ======================= THEMA ======================= */
+$('#themebtn').onclick=function(){
+  var r=document.documentElement;
+  var nu=r.getAttribute('data-theme');
+  var donkerNu = nu ? nu==='dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  r.setAttribute('data-theme', donkerNu?'light':'dark');
+  try{ localStorage.setItem('autotheorie-thema', donkerNu?'light':'dark'); }catch(e){}
+};
+try{ var th=localStorage.getItem('autotheorie-thema'); if(th) document.documentElement.setAttribute('data-theme',th); }catch(e){}
+
+/* ======================= START ======================= */
+teken();
+initOpslag();
+})();
+</script>
