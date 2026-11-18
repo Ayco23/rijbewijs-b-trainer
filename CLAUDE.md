@@ -36,6 +36,12 @@ In deze repo staat alleen wat gepubliceerd wordt: `index.html` (de gebouwde app)
 `src/` met de bronbestanden, en `docs/` plus `tools/`. De werkmap bevat daarnaast
 `borden-download/` en `site/`.
 
+Er staat **geen plan in de hoofdmap**. Dat was er wel (`PLAN.MD`) en dat leidde tot
+verwarring: een nieuwe sessie kan zo'n bestand oppakken en afgerond werk opnieuw gaan doen.
+Het staat nu als `docs/plan-oorspronkelijk.md` met bovenaan dat het af is. Wat er nog open
+staat hoort in `docs/status-en-openstaand.md`, en wat we hierna willen in
+`docs/plan-volgende-ronde.md`.
+
 `content-signs.js` is **oud en ongebruikt** — de nagetekende borden van vóór de officiële set.
 Niet laden, kan weg.
 
