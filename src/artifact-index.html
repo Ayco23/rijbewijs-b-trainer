@@ -739,7 +739,7 @@ function vulBeloningenTerug(){
 
 /* ---------- Sprite en geluid ---------- */
 /* De artifact-CSP blokkeert externe afbeeldingen, dus daar zitten de sprites
-   als data-URI in poke-assets.js. Dat bestand gaat bewust niet mee naar de
+   als data-URI in poke-sprites.js. Dat bestand gaat bewust niet mee naar de
    publieke repo (de tekeningen zijn van The Pokemon Company); die variant laadt
    ze van PokeAPI. Dat is deze ene if. */
 function spriteBron(id, shiny){
@@ -1881,7 +1881,6 @@ function eindExamen(){
   v.appendChild(h); $('#main').scrollTop=0;
 }
 
-/* ---------- BATTLE PASS ---------- */
 /* ---------- COLLECTIE ---------- */
 /* Raster van 151 vakjes. Wat je verdiend hebt toont de sprite, de rest een
    silhouet — zo zie je meteen wat er nog te halen valt. */
@@ -1957,6 +1956,7 @@ function pokeVak(id, bel, detail){
   return t;
 }
 
+/* ---------- BATTLE PASS ---------- */
 function vPass(v){
   var t=passTier();
   var h=el('div','stack');
