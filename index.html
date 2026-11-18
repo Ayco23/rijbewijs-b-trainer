@@ -1284,8 +1284,8 @@ function huidigeDag(){
   var d=dagState();
   if(d.dagnr) return d.dagnr;
   var i=1; while(i<14 && S.dagenGedaan[i]) i++;
-  d.dagnr=i; bewaar();
-  return i;
+  d.dagnr=i;            // alleen in het geheugen: tekenen mag nooit opslaan,
+  return i;             // anders overschrijft de eerste render je voortgang
 }
 
 /* ======================= LEITNER (flashcards) ======================= */
@@ -2043,7 +2043,9 @@ $('#themebtn').onclick=function(){
 try{ var th=localStorage.getItem('autotheorie-thema'); if(th) document.documentElement.setAttribute('data-theme',th); }catch(e){}
 
 /* ======================= START ======================= */
-teken();
+/* initOpslag leest eerst de opgeslagen voortgang en tekent daarna pas.
+   Hier niet alvast teken() aanroepen: dat zou een lege beginstand tonen
+   en, erger, kunnen wegschrijven voordat er iets is ingelezen. */
 initOpslag();
 })();
 </script>
