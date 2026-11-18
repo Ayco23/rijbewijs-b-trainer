@@ -814,7 +814,7 @@ var S = {
   xp:0, streak:0, laatsteDag:null, dagenGedaan:{},
   mod:{}, leitner:{}, fout:[], examens:[], gezien:{},
   // Wat je vandaag gedaan hebt. Wordt vanzelf leeggemaakt zodra het een nieuwe dag is.
-  dag:{datum:'', taken:{}, xp:0, goed:0, fout:0},
+  dag:{datum:'', taken:{}, xp:0, goed:0, fout:0, dagnr:0},
   instel:{geluid:true, animatie:true}
 };
 MODULES.forEach(function(m){ S.mod[m.id]={goed:0,fout:0,les:0}; });
@@ -834,7 +834,8 @@ function schoon(raw){
   if(raw.dag&&typeof raw.dag==='object') S.dag={
     datum: typeof raw.dag.datum==='string'?raw.dag.datum:'',
     taken: (raw.dag.taken&&typeof raw.dag.taken==='object')?raw.dag.taken:{},
-    xp:+raw.dag.xp||0, goed:+raw.dag.goed||0, fout:+raw.dag.fout||0
+    xp:+raw.dag.xp||0, goed:+raw.dag.goed||0, fout:+raw.dag.fout||0,
+    dagnr:+raw.dag.dagnr||0
   };
   if(raw.instel&&typeof raw.instel==='object'){
     S.instel.geluid   = raw.instel.geluid!==false;
@@ -845,7 +846,7 @@ function schoon(raw){
 /* ---------- Wat je vandaag deed ---------- */
 function dagState(){
   var t=vandaagStr();
-  if(S.dag.datum!==t) S.dag={datum:t, taken:{}, xp:0, goed:0, fout:0};
+  if(S.dag.datum!==t) S.dag={datum:t, taken:{}, xp:0, goed:0, fout:0, dagnr:0};
   return S.dag;
 }
 function taakKlaar(sleutel){
@@ -1276,7 +1277,16 @@ var DAGPLAN=[];
     }
   }
 })();
-function huidigeDag(){ for(var i=1;i<=14;i++) if(!S.dagenGedaan[i]) return i; return 14; }
+/* Eén programmadag per kalenderdag. Rond je dag 1 af, dan blijf je vandaag
+   op dag 1 staan (met het vinkje) in plaats van meteen door te schuiven naar
+   dag 2; anders zou het werk van vandaag als voortgang van morgen tellen. */
+function huidigeDag(){
+  var d=dagState();
+  if(d.dagnr) return d.dagnr;
+  var i=1; while(i<14 && S.dagenGedaan[i]) i++;
+  d.dagnr=i; bewaar();
+  return i;
+}
 
 /* ======================= LEITNER (flashcards) ======================= */
 function bakVan(c){ return S.leitner[c]||1; }
@@ -1362,7 +1372,7 @@ function vInstel(v){
   wis.onclick=function(){
     if(wis.dataset.zeker!=='1'){ wis.dataset.zeker='1'; wis.textContent='Zeker weten? Klik nog een keer'; return; }
     S.xp=0; S.streak=0; S.laatsteDag=null; S.dagenGedaan={}; S.fout=[]; S.examens=[];
-    S.leitner={}; S.gezien={}; S.dag={datum:'',taken:{},xp:0,goed:0,fout:0};
+    S.leitner={}; S.gezien={}; S.dag={datum:'',taken:{},xp:0,goed:0,fout:0,dagnr:0};
     MODULES.forEach(function(m){ S.mod[m.id]={goed:0,fout:0,les:0}; });
     bewaar(); toast('Voortgang gewist'); TAB='vandaag'; teken();
   };
