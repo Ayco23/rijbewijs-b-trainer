@@ -150,10 +150,27 @@ table.res{width:100%;border-collapse:collapse;font-size:13.5px}
 table.res td{padding:7px 0;border-bottom:1px solid var(--line)}
 table.res td:last-child{text-align:right;font-variant-numeric:tabular-nums}
 
-/* ---- vandaag: ring, cijfers, dagstrip ---- */
-.dagkop{display:flex;gap:14px;align-items:center}
-.dagring{flex:0 0 auto;width:72px;height:72px}
-.dagring svg{width:100%;height:100%;display:block}
+/* ---- de wereld van de weg ---- */
+/* Onder de bovenbalk loopt een strook asfalt met belijning: de app begint
+   letterlijk op de weg. */
+header{position:relative}
+header::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:5px;
+  background:repeating-linear-gradient(90deg,var(--asfalt) 0 14px,transparent 14px 26px);opacity:.45}
+.ritwrap{margin:2px -4px 0}
+.rit{width:100%;height:auto;display:block}
+.klaarvlag{flex:0 0 auto;line-height:0}
+.kopRij{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.kopRij h2{min-width:0}
+.ringwrap{flex:0 0 auto;position:relative;width:46px;height:46px}
+.ringwrap .ring{width:46px;height:46px}
+.modico{position:absolute;inset:0;display:grid;place-items:center;line-height:0}
+.modkaart{border-left:4px solid var(--c)}
+.modkop{display:flex;gap:11px;align-items:center}
+.modbadge{flex:0 0 auto;width:44px;height:44px;border-radius:12px;background:var(--surface-2);
+  display:grid;place-items:center;line-height:0}
+.uitslaglicht{display:flex;justify-content:center;line-height:0;margin-bottom:2px}
+
+/* ---- vandaag: cijfers en dagstrip ---- */
 .cijfers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:2px}
 .cijfer{background:var(--surface-2);border-radius:10px;padding:9px 8px;text-align:center;min-width:0}
 .cijfer .cv{font-family:var(--f-disp);font-weight:800;font-size:16px;line-height:1.2}
@@ -327,6 +344,72 @@ function geefXP(n,reden){
   },700);
 }
 
+/* ======================= ILLUSTRATIES ======================= */
+/* Alles wat hier getekend wordt komt uit de wereld van de weg: asfalt,
+   belijning, stoplichten, een auto die vordert. Inline SVG, zodat het
+   meeschaalt en in beide thema's klopt. */
+var AFB = {
+  /* Zijaanzicht van een auto, standaard 40 breed. */
+  auto: function(kleur, sz){
+    var s=sz||40;
+    return '<svg viewBox="0 0 60 30" width="'+s+'" height="'+(s*0.5)+'" aria-hidden="true">'+
+      '<path d="M4 20h52v-5c0-2-1.5-3.5-4-4l-6-5c-1.5-1.5-3-2-5-2H22c-2.5 0-4 .8-5.5 2.5L12 11c-5 .8-8 2.5-8 5z" fill="'+kleur+'"/>'+
+      '<path d="M21 6h8v5h-13z" fill="#cfe2ff" opacity=".85"/>'+
+      '<path d="M31 6h6c1.3 0 2 .4 3 1.4l3 3.6h-12z" fill="#cfe2ff" opacity=".85"/>'+
+      '<circle cx="17" cy="21" r="5.5" fill="#222"/><circle cx="17" cy="21" r="2.2" fill="#bbb"/>'+
+      '<circle cx="45" cy="21" r="5.5" fill="#222"/><circle cx="45" cy="21" r="2.2" fill="#bbb"/>'+
+      '</svg>';
+  },
+  /* De weg van vandaag: de auto staat op de plek van je voortgang. */
+  rit: function(pct, klaar){
+    var x = 14 + pct*210;
+    var blokjes='';
+    for(var i=0;i<6;i++) for(var j=0;j<2;j++)
+      blokjes+='<rect x="'+(248+i*5)+'" y="'+(40+j*7)+'" width="5" height="7" fill="'+(((i+j)%2)?'#fff':'#1b2330')+'"/>';
+    var strepen='';
+    for(var k=0;k<11;k++) strepen+='<rect x="'+(10+k*24)+'" y="51" width="13" height="3" rx="1.5" fill="#fff" opacity=".85"/>';
+    return '<svg viewBox="0 0 280 72" class="rit" aria-hidden="true">'+
+      '<rect x="0" y="34" width="280" height="30" rx="4" fill="#424b58"/>'+
+      '<rect x="0" y="31" width="280" height="3" fill="#8e98a6" opacity=".5"/>'+
+      strepen + blokjes +
+      '<g transform="translate('+x+' 20)">'+AFB.auto(klaar?'#4bd08a':'#f2c200',44)+'</g>'+
+      '</svg>';
+  },
+  /* Stoplicht, gebruikt bij de uitslag van het proefexamen. */
+  stoplicht: function(aan, sz){
+    var s=sz||52, uit='#2a313c';
+    return '<svg viewBox="0 0 40 92" width="'+(s*0.43)+'" height="'+s+'" aria-hidden="true">'+
+      '<rect x="2" y="2" width="36" height="78" rx="8" fill="#1f2630" stroke="#3b4451" stroke-width="2"/>'+
+      '<rect x="17" y="78" width="6" height="13" fill="#3b4451"/>'+
+      '<circle cx="20" cy="22" r="10" fill="'+(aan==='rood'?'#e8403f':uit)+'"/>'+
+      '<circle cx="20" cy="43" r="10" fill="'+(aan==='geel'?'#f2c200':uit)+'"/>'+
+      '<circle cx="20" cy="64" r="10" fill="'+(aan==='groen'?'#2fbf71':uit)+'"/>'+
+      '</svg>';
+  },
+  vlag: function(sz){
+    var s=sz||44, b='';
+    for(var i=0;i<5;i++) for(var j=0;j<4;j++)
+      b+='<rect x="'+(10+i*7)+'" y="'+(6+j*7)+'" width="7" height="7" fill="'+(((i+j)%2)?'#fff':'#1b2330')+'"/>';
+    return '<svg viewBox="0 0 50 50" width="'+s+'" height="'+s+'" aria-hidden="true">'+
+      '<rect x="5" y="4" width="4" height="44" rx="2" fill="#8e98a6"/>'+b+'</svg>';
+  },
+  /* Eén herkenbaar pictogram per module. */
+  mod: {
+    weg:'<path d="M26 8h12l8 48H18z" fill="currentColor" opacity=".25"/><rect x="29" y="12" width="6" height="9" rx="3" fill="currentColor"/><rect x="29" y="27" width="6" height="9" rx="3" fill="currentColor"/><rect x="29" y="42" width="6" height="9" rx="3" fill="currentColor"/>',
+    voorrang:'<path d="M32 6 58 32 32 58 6 32z" fill="none" stroke="currentColor" stroke-width="5"/><path d="M32 20v24M20 32h24" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>',
+    bijzonder:'<path d="M10 50c10-28 34-28 44 0" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="14" cy="50" r="5" fill="currentColor"/><circle cx="50" cy="50" r="5" fill="currentColor"/>',
+    veilig:'<path d="M32 8 58 54H6z" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/><path d="M32 24v14" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="46" r="3" fill="currentColor"/>',
+    tekens:'<rect x="18" y="6" width="28" height="44" rx="7" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="32" cy="17" r="5" fill="currentColor"/><circle cx="32" cy="28" r="5" fill="currentColor" opacity=".5"/><circle cx="32" cy="39" r="5" fill="currentColor" opacity=".25"/><rect x="29" y="50" width="6" height="9" fill="currentColor"/>',
+    milieu:'<path d="M32 56c0-18 8-28 22-30-2 16-10 26-22 30z" fill="currentColor" opacity=".45"/><path d="M32 56C20 48 12 36 10 20c16 4 22 16 22 36z" fill="currentColor"/>',
+    wet:'<path d="M32 8v44M14 20h36" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M14 20 7 38h14zM50 20l-7 18h14z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><rect x="20" y="52" width="24" height="5" rx="2.5" fill="currentColor"/>',
+    voertuig:'<circle cx="32" cy="32" r="24" fill="none" stroke="currentColor" stroke-width="5"/><circle cx="32" cy="32" r="8" fill="currentColor"/><path d="M32 8v10M32 46v10M8 32h10M46 32h10" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>'
+  },
+  modIcoon: function(id, sz){
+    var p=AFB.mod[id]; if(!p) return '';
+    return '<svg viewBox="0 0 64 64" width="'+(sz||26)+'" height="'+(sz||26)+'" aria-hidden="true">'+p+'</svg>';
+  }
+};
+
 /* ======================= GELUID EN CONFETTI ======================= */
 /* Geluid wordt ter plekke opgewekt met de Web Audio API: geen bestanden,
    dus het werkt ook offline. Browsers staan audio pas toe na een klik,
@@ -369,43 +452,71 @@ var GELUID = {
 };
 function geluid(naam){ if(S.instel.geluid && GELUID[naam]) GELUID[naam](); }
 
-/* Confetti als SVG-snippers die naar beneden dwarrelen. */
+/* Confetti: snippers in de vorm van verkeersborden, die dwarrelen of
+   vanuit het midden wegschieten. */
 var SVGNS='http://www.w3.org/2000/svg';
-function confetti(aantal, duurMs){
+var CONF_KLEUR=['#f2c200','#0b4ea2','#d2272e','#17794a','#ffffff','#5a9bf0','#e8803a'];
+
+function confettiStuk(svg, maat, kleur){
+  var soort=Math.random(), e;
+  if(soort<0.30){                                   // rond bord
+    e=document.createElementNS(SVGNS,'circle');
+    e.setAttribute('r',maat/2); e.setAttribute('fill',kleur);
+  } else if(soort<0.52){                            // waarschuwingsdriehoek
+    e=document.createElementNS(SVGNS,'polygon');
+    var h=maat*0.9;
+    e.setAttribute('points','0,'+(-h/2)+' '+(maat/2)+','+(h/2)+' '+(-maat/2)+','+(h/2));
+    e.setAttribute('fill',kleur);
+  } else if(soort<0.66){                            // gele ruit, de voorrangsweg
+    e=document.createElementNS(SVGNS,'polygon');
+    e.setAttribute('points','0,'+(-maat/2)+' '+(maat/2)+',0 0,'+(maat/2)+' '+(-maat/2)+',0');
+    e.setAttribute('fill','#f2c200');
+  } else {                                          // gewone snipper
+    e=document.createElementNS(SVGNS,'rect');
+    e.setAttribute('width',maat); e.setAttribute('height',maat*(0.45+Math.random()*0.5));
+    e.setAttribute('x',-maat/2); e.setAttribute('y',-maat/3);
+    e.setAttribute('rx',1); e.setAttribute('fill',kleur);
+  }
+  svg.appendChild(e); return e;
+}
+function confetti(aantal, duurMs, modus){
   if(!S.instel.animatie || GEEN_BEWEGING) return;
   var svg=document.createElementNS(SVGNS,'svg');
-  svg.setAttribute('class','confetti');
-  svg.setAttribute('aria-hidden','true');
+  svg.setAttribute('class','confetti'); svg.setAttribute('aria-hidden','true');
   svg.setAttribute('preserveAspectRatio','none');
   var W=window.innerWidth, H=window.innerHeight;
   svg.setAttribute('viewBox','0 0 '+W+' '+H);
   document.body.appendChild(svg);
 
-  var kleuren=['#f2c200','#0b4ea2','#d2272e','#17794a','#ffffff','#5a9bf0'];
   var stukken=[];
   for(var i=0;i<aantal;i++){
-    var r=document.createElementNS(SVGNS,'rect');
-    var b=5+Math.random()*6, hh=b*(0.5+Math.random());
-    r.setAttribute('width',b); r.setAttribute('height',hh);
-    r.setAttribute('fill',kleuren[(Math.random()*kleuren.length)|0]);
-    r.setAttribute('rx',1);
-    svg.appendChild(r);
-    stukken.push({
-      el:r, x:Math.random()*W, y:-20-Math.random()*H*0.5,
-      vx:(Math.random()-0.5)*1.6, vy:2.2+Math.random()*3.4,
-      hoek:Math.random()*360, draai:(Math.random()-0.5)*14, w:b, h:hh
-    });
+    var maat=6+Math.random()*9;
+    var kleur=CONF_KLEUR[(Math.random()*CONF_KLEUR.length)|0];
+    var e=confettiStuk(svg, maat, kleur), p;
+    if(modus==='knal'){                 // schiet vanuit het midden naar buiten
+      var hoek=Math.random()*Math.PI*2, kracht=4+Math.random()*9;
+      p={el:e, x:W/2, y:H*0.42, vx:Math.cos(hoek)*kracht, vy:Math.sin(hoek)*kracht-4,
+         hoek:Math.random()*360, draai:(Math.random()-0.5)*22};
+    } else {                            // dwarrelt van boven naar beneden
+      p={el:e, x:Math.random()*W, y:-20-Math.random()*H*0.6,
+         vx:(Math.random()-0.5)*1.8, vy:2.2+Math.random()*3.6,
+         hoek:Math.random()*360, draai:(Math.random()-0.5)*16};
+    }
+    p.zwaai=Math.random()*Math.PI*2;
+    stukken.push(p);
   }
   var begin=performance.now(), duur=duurMs||2600;
   function stap(nu){
     var verstreken=nu-begin;
     if(verstreken>duur){ svg.remove(); return; }
-    var vervaag = verstreken>duur-600 ? (duur-verstreken)/600 : 1;
-    svg.style.opacity=vervaag;
+    svg.style.opacity = verstreken>duur-700 ? (duur-verstreken)/700 : 1;
     for(var i=0;i<stukken.length;i++){
       var p=stukken[i];
-      p.x+=p.vx; p.y+=p.vy; p.hoek+=p.draai; p.vy+=0.04;
-      p.el.setAttribute('transform','translate('+(p.x-p.w/2)+' '+(p.y-p.h/2)+') rotate('+p.hoek+' '+(p.w/2)+' '+(p.h/2)+')');
+      p.zwaai+=0.09;
+      p.x += p.vx + Math.sin(p.zwaai)*0.7;   // lichte zijwaartse zwaai
+      p.y += p.vy; p.vy += 0.10; p.vx *= 0.995;
+      p.hoek += p.draai;
+      p.el.setAttribute('transform','translate('+p.x+' '+p.y+') rotate('+p.hoek+')');
     }
     requestAnimationFrame(stap);
   }
@@ -414,7 +525,18 @@ function confetti(aantal, duurMs){
 /* Eén ingang voor alle vieringen, zodat geluid en beeld samen blijven lopen. */
 function vier(soort){
   geluid(soort==='level'||soort==='pass'?soort:(soort==='groot'?'groot':'klein'));
-  confetti(soort==='groot'?120:soort==='level'?90:55, soort==='groot'?3200:2400);
+  if(soort==='groot'){                       // dag af of examen gehaald
+    confetti(90, 1700, 'knal');
+    setTimeout(function(){ confetti(150, 4200); }, 180);
+  } else if(soort==='level'){
+    confetti(70, 1500, 'knal');
+    setTimeout(function(){ confetti(90, 3200); }, 150);
+  } else if(soort==='pass'){
+    confetti(60, 1400, 'knal');
+    setTimeout(function(){ confetti(70, 2800); }, 150);
+  } else {
+    confetti(95, 2800);
+  }
 }
 function toast(t){ var n=$('#toast'); n.textContent=t; n.classList.add('on'); clearTimeout(n._t); n._t=setTimeout(function(){n.classList.remove('on')},2600); }
 
@@ -811,26 +933,19 @@ function vVandaag(v){
 
   /* ---- Kop: wat heb je vandaag gedaan ---- */
   var top=el('div','card stack');
-  var kop=el('div','dagkop');
-  var r=40, C=2*Math.PI*r, pct=taken.length? af/taken.length : 0;
-  var ringEl=el('div','dagring');
-  ringEl.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true">'+
-    '<circle cx="50" cy="50" r="'+r+'" fill="none" stroke="var(--surface-2)" stroke-width="12"/>'+
-    '<circle cx="50" cy="50" r="'+r+'" fill="none" stroke="'+(alles?'var(--goed)':'var(--blauw)')+'" stroke-width="12" stroke-linecap="round" '+
-    'stroke-dasharray="'+C+'" stroke-dashoffset="'+(C-C*pct)+'" transform="rotate(-90 50 50)"/>'+
-    (alles
-      ? '<path d="M33 51l12 12 22-26" fill="none" stroke="var(--goed)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>'
-      : '<text x="50" y="50" text-anchor="middle" dominant-baseline="central" fill="var(--fg)" font-family="Archivo, Arial" font-weight="800" font-size="30">'+af+'</text>')+
-    '</svg>';
-  kop.appendChild(ringEl);
+  var pct = taken.length ? af/taken.length : 0;
   var kt=el('div'); kt.style.minWidth='0';
   kt.appendChild(el('div','eyebrow','Vandaag · dag '+dag+' van 14'));
-  kt.appendChild(el('h2',null, alles ? 'Dag '+dag+' afgerond' : (af===0 ? 'Nog niets gedaan vandaag' : af+' van '+taken.length+' klaar')));
+  var kopRij=el('div','kopRij');
+  kopRij.appendChild(el('h2',null, alles ? 'Dag '+dag+' afgerond' : (af===0 ? 'Nog niets gedaan vandaag' : af+' van '+taken.length+' klaar')));
+  if(alles){ var vl=el('div','klaarvlag'); vl.innerHTML=AFB.vlag(34); kopRij.appendChild(vl); }
+  kt.appendChild(kopRij);
   kt.appendChild(el('div','small muted', alles
     ? 'Mooi gedaan. Morgen gaat het verder met dag '+Math.min(dag+1,14)+'.'
     : (dag<=10 && mod ? 'Module: '+mod.titel : 'Herhalen en proefexamen')));
-  kop.appendChild(kt);
-  top.appendChild(kop);
+  top.appendChild(kt);
+  /* De rit van vandaag: je auto schuift op naar de finish naarmate je taken afvinkt. */
+  var rit=el('div','ritwrap'); rit.innerHTML=AFB.rit(pct, alles); top.appendChild(rit);
 
   /* Drie cijfers over vandaag, zodat je je inspanning terugziet. */
   var cij=el('div','cijfers');
@@ -916,7 +1031,10 @@ function modStatKaart(m){
   var r=36, C=2*Math.PI*r;
   var ring='<svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="'+r+'" fill="none" stroke="var(--surface-2)" stroke-width="13"/>'+
     '<circle cx="50" cy="50" r="'+r+'" fill="none" stroke="var('+m.kleur+')" stroke-width="13" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+(C-C*pct/100)+'" transform="rotate(-90 50 50)"/></svg>';
-  var rr=el('div'); rr.innerHTML=ring; rr.style.flex='0 0 auto'; b.appendChild(rr.firstChild);
+  var rr=el('div','ringwrap'); rr.innerHTML=ring;
+  var ic=el('div','modico'); ic.style.color='var('+m.kleur+')'; ic.innerHTML=AFB.modIcoon(m.id,24);
+  rr.appendChild(ic);
+  b.appendChild(rr);
   var box=el('div'); box.style.flex='1'; box.style.minWidth='0';
   var t=el('div',null,m.titel); t.style.fontWeight='600'; box.appendChild(t);
   box.appendChild(el('div','small muted', tot? (st.goed+' goed van '+tot+' · '+medaille) : 'nog niet geoefend'));
@@ -931,9 +1049,16 @@ function vLeren(v){
   h.appendChild(el('h2',null,'Leren'));
   h.appendChild(el('div','small muted','Kies een module. Je leest eerst de kaartjes en maakt daarna de quiz.'));
   MODULES.forEach(function(m){
-    var c=el('div','card stack');
-    c.appendChild(el('div','eyebrow','Module '+m.nr));
-    c.appendChild(el('h3',null,m.titel));
+    var c=el('div','card stack modkaart');
+    c.style.setProperty('--c','var('+m.kleur+')');
+    var kop=el('div','modkop');
+    var ic=el('div','modbadge'); ic.style.color='var('+m.kleur+')'; ic.innerHTML=AFB.modIcoon(m.id,30);
+    kop.appendChild(ic);
+    var kb=el('div'); kb.style.minWidth='0';
+    kb.appendChild(el('div','eyebrow','Module '+m.nr));
+    kb.appendChild(el('h3',null,m.titel));
+    kop.appendChild(kb);
+    c.appendChild(kop);
     c.appendChild(el('div','small muted',m.samenvatting));
     var row=el('div'); row.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
     var b1=el('button','btn sec','Lesstof ('+m.lessons.length+')'); b1.onclick=function(){startLes(m)};
@@ -1359,6 +1484,8 @@ function eindExamen(){
   var v=$('#view'); v.innerHTML='';
   var h=el('div','stack');
   var c=el('div','card stack'); c.style.textAlign='center';
+  var licht=el('div','uitslaglicht'); licht.innerHTML=AFB.stoplicht(geslaagd?'groen':'rood', 86);
+  c.appendChild(licht);
   c.appendChild(el('div','eyebrow', geslaagd?'Geslaagd':'Gezakt'));
   var sc=el('div','score tnum',goed+'/'+E.vragen.length); sc.style.color= geslaagd?'var(--goed)':'var(--fout)';
   c.appendChild(sc);
