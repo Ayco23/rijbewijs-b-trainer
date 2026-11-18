@@ -41,6 +41,7 @@ Begin bij [CLAUDE.md](CLAUDE.md) — dat is het startpunt voor wie aan deze app 
 - [docs/publiceren.md](docs/publiceren.md) — de drie publicatievormen en wat de CSP toestaat
 - [docs/status-en-openstaand.md](docs/status-en-openstaand.md) — wat af is, wat niet, en de bugs die eruit kwamen
 - [docs/plan-volgende-ronde.md](docs/plan-volgende-ronde.md) — het plan voor de volgende ronde
+- [docs/startprompt-volgende-ronde.md](docs/startprompt-volgende-ronde.md) — kant-en-klare prompt om de volgende ronde te starten
 - [docs/plan-oorspronkelijk.md](docs/plan-oorspronkelijk.md) — de oorspronkelijke opdracht, afgerond, ter verantwoording
 
 ## Scripts
