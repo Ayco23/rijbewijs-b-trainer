@@ -158,6 +158,37 @@ table.res{width:100%;border-collapse:collapse;font-size:13.5px}
 table.res td{padding:7px 0;border-bottom:1px solid var(--line)}
 table.res td:last-child{text-align:right;font-variant-numeric:tabular-nums}
 
+/* ---- vandaag: ring, cijfers, dagstrip ---- */
+.dagkop{display:flex;gap:14px;align-items:center}
+.dagring{flex:0 0 auto;width:72px;height:72px}
+.dagring svg{width:100%;height:100%;display:block}
+.cijfers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:2px}
+.cijfer{background:var(--surface-2);border-radius:10px;padding:9px 8px;text-align:center;min-width:0}
+.cijfer .cv{font-family:var(--f-disp);font-weight:800;font-size:16px;line-height:1.2}
+.cijfer .cl{font-size:10.5px;color:var(--fg-2);margin-top:2px}
+.dagen{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.dagvak{aspect-ratio:1;border-radius:8px;border:1.5px solid var(--line);background:var(--surface-2);
+  display:grid;place-items:center;font-size:11.5px;color:var(--fg-3);font-weight:600}
+.dagvak[data-st="af"]{background:var(--goed);border-color:var(--goed);color:#fff}
+.dagvak[data-st="nu"]{border-color:var(--blauw);color:var(--blauw);box-shadow:0 0 0 2px rgba(11,78,162,.18)}
+.vink{flex:0 0 auto;width:22px;height:22px}
+.vink svg{width:100%;height:100%;display:block}
+.modcard.gedaan .small{color:var(--goed)}
+
+/* ---- instellingen ---- */
+.schakel{display:flex;gap:12px;align-items:center;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid var(--line)}
+.schakel:last-of-type{border-bottom:0}
+.tuimel{flex:0 0 auto;width:46px;height:27px;border-radius:99px;border:1.5px solid var(--line);
+  background:var(--surface-2);cursor:pointer;padding:0;position:relative;transition:background .18s,border-color .18s}
+.tuimel[data-aan="1"]{background:var(--goed);border-color:var(--goed)}
+.tuimel .dop{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;
+  background:#fff;transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.tuimel[data-aan="1"] .dop{transform:translateX(19px)}
+
+/* ---- confetti ---- */
+.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
+
 .toast{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
   background:var(--asfalt);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13px;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw}
 .toast.on{opacity:1}
@@ -173,6 +204,7 @@ table.res td:last-child{text-align:right;font-variant-numeric:tabular-nums}
     </div>
     <div class="streak"><b class="tnum" id="streak">0</b>dagen</div>
     <button class="hbtn" id="themebtn" title="Licht of donker" aria-label="Thema wisselen">◐</button>
+    <button class="hbtn" id="setbtn" title="Instellingen" aria-label="Instellingen">⚙</button>
   </div>
 </header>
 
@@ -780,7 +812,10 @@ var esc = function(s){var d=document.createElement('div'); d.textContent=s; retu
 /* ======================= STATE ======================= */
 var S = {
   xp:0, streak:0, laatsteDag:null, dagenGedaan:{},
-  mod:{}, leitner:{}, fout:[], examens:[], gezien:{}
+  mod:{}, leitner:{}, fout:[], examens:[], gezien:{},
+  // Wat je vandaag gedaan hebt. Wordt vanzelf leeggemaakt zodra het een nieuwe dag is.
+  dag:{datum:'', taken:{}, xp:0, goed:0, fout:0},
+  instel:{geluid:true, animatie:true}
 };
 MODULES.forEach(function(m){ S.mod[m.id]={goed:0,fout:0,les:0}; });
 
@@ -796,6 +831,40 @@ function schoon(raw){
   if(raw.mod&&typeof raw.mod==='object') MODULES.forEach(function(m){
     var r=raw.mod[m.id]; if(r) S.mod[m.id]={goed:+r.goed||0, fout:+r.fout||0, les:+r.les||0};
   });
+  if(raw.dag&&typeof raw.dag==='object') S.dag={
+    datum: typeof raw.dag.datum==='string'?raw.dag.datum:'',
+    taken: (raw.dag.taken&&typeof raw.dag.taken==='object')?raw.dag.taken:{},
+    xp:+raw.dag.xp||0, goed:+raw.dag.goed||0, fout:+raw.dag.fout||0
+  };
+  if(raw.instel&&typeof raw.instel==='object'){
+    S.instel.geluid   = raw.instel.geluid!==false;
+    S.instel.animatie = raw.instel.animatie!==false;
+  }
+}
+
+/* ---------- Wat je vandaag deed ---------- */
+function dagState(){
+  var t=vandaagStr();
+  if(S.dag.datum!==t) S.dag={datum:t, taken:{}, xp:0, goed:0, fout:0};
+  return S.dag;
+}
+function taakKlaar(sleutel){
+  var d=dagState();
+  if(d.taken[sleutel]) return false;   // al eerder vandaag gedaan
+  d.taken[sleutel]=1; bewaar();
+  return true;
+}
+function telAntwoord(goed){ var d=dagState(); goed?d.goed++:d.fout++; }
+/* De taken die bij de dag van vandaag horen. */
+function dagTaken(dag){
+  var plan=DAGPLAN[dag-1]; if(!plan) return [];
+  if(dag<=10){
+    var mod=MODULES.filter(function(m){return m.id===plan.mod})[0];
+    var lijst=[{k:'les', nm:'Lesstof lezen'},{k:'quiz', nm:'Quiz'},{k:'borden', nm:'Flashcards borden'}];
+    if(mod && mod.puzzles.length) lijst.push({k:'puzzel', nm:'Situatiepuzzel'});
+    return lijst;
+  }
+  return [{k:'examen', nm:'Proefexamen'},{k:'fouten', nm:'Foutenbak'}];
 }
 function laadLokaal(){ try{ var r=localStorage.getItem(LS_KEY); if(r) schoon(JSON.parse(r)); }catch(e){} }
 function bewaar(){
@@ -828,10 +897,107 @@ function levelInfo(){
   return {n:n, naam:NIVEAUS[Math.min(n-1,NIVEAUS.length-1)], in:S.xp-onder, nodig:boven-onder, boven:boven};
 }
 function geefXP(n,reden){
-  var oud=level(); S.xp+=n; bewaar(); kopBij();
+  var oud=level(), oudTier=passTier();
+  S.xp+=n; dagState().xp+=n; bewaar(); kopBij();
   var p=$('#xppop'); p.textContent='+'+n+' XP'+(reden?' · '+reden:''); p.classList.add('on');
   setTimeout(function(){p.classList.remove('on')},900);
-  if(level()>oud) setTimeout(function(){ toast('Level '+level()+': '+levelInfo().naam+'!'); },700);
+  if(level()>oud) setTimeout(function(){
+    toast('Level '+level()+': '+levelInfo().naam+'!'); vier('level');
+  },700);
+  else if(passTier()>oudTier) setTimeout(function(){
+    var t=PASS[passTier()-1];
+    toast('Battle pass tier '+t.tier+' vrijgespeeld: '+t.nm); vier('pass');
+  },700);
+}
+
+/* ======================= GELUID EN CONFETTI ======================= */
+/* Geluid wordt ter plekke opgewekt met de Web Audio API: geen bestanden,
+   dus het werkt ook offline. Browsers staan audio pas toe na een klik,
+   en dat is hier altijd het geval. */
+var AC=null;
+function audioCtx(){
+  if(!S.instel.geluid) return null;
+  try{
+    var C = window.AudioContext || window.webkitAudioContext;
+    if(!C) return null;
+    AC = AC || new C();
+    if(AC.state==='suspended') AC.resume();
+    return AC;
+  }catch(e){ return null; }
+}
+/* Speelt een reeks tonen af. [[frequentie, startInSeconden, duur], ...] */
+function tonen(reeks, vorm, volume){
+  var ac=audioCtx(); if(!ac) return;
+  try{
+    reeks.forEach(function(t){
+      var osc=ac.createOscillator(), g=ac.createGain();
+      osc.type = vorm || 'sine';
+      osc.frequency.value = t[0];
+      var start = ac.currentTime + t[1], eind = start + t[2];
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.exponentialRampToValueAtTime(volume||0.12, start+0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, eind);
+      osc.connect(g); g.connect(ac.destination);
+      osc.start(start); osc.stop(eind+0.02);
+    });
+  }catch(e){}
+}
+var GELUID = {
+  goed:    function(){ tonen([[660,0,.09],[880,.07,.13]], 'sine', .10); },
+  fout:    function(){ tonen([[220,0,.16]], 'triangle', .09); },
+  klein:   function(){ tonen([[523,0,.09],[659,.08,.09],[784,.16,.18]], 'sine', .11); },
+  groot:   function(){ tonen([[523,0,.1],[659,.1,.1],[784,.2,.1],[1047,.3,.3]], 'sine', .12); },
+  level:   function(){ tonen([[440,0,.1],[554,.1,.1],[659,.2,.1],[880,.3,.35]], 'sine', .12); },
+  pass:    function(){ tonen([[784,0,.1],[988,.1,.1],[1175,.2,.26]], 'sine', .11); }
+};
+function geluid(naam){ if(S.instel.geluid && GELUID[naam]) GELUID[naam](); }
+
+/* Confetti als SVG-snippers die naar beneden dwarrelen. */
+var SVGNS='http://www.w3.org/2000/svg';
+function confetti(aantal, duurMs){
+  if(!S.instel.animatie || GEEN_BEWEGING) return;
+  var svg=document.createElementNS(SVGNS,'svg');
+  svg.setAttribute('class','confetti');
+  svg.setAttribute('aria-hidden','true');
+  svg.setAttribute('preserveAspectRatio','none');
+  var W=window.innerWidth, H=window.innerHeight;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  document.body.appendChild(svg);
+
+  var kleuren=['#f2c200','#0b4ea2','#d2272e','#17794a','#ffffff','#5a9bf0'];
+  var stukken=[];
+  for(var i=0;i<aantal;i++){
+    var r=document.createElementNS(SVGNS,'rect');
+    var b=5+Math.random()*6, hh=b*(0.5+Math.random());
+    r.setAttribute('width',b); r.setAttribute('height',hh);
+    r.setAttribute('fill',kleuren[(Math.random()*kleuren.length)|0]);
+    r.setAttribute('rx',1);
+    svg.appendChild(r);
+    stukken.push({
+      el:r, x:Math.random()*W, y:-20-Math.random()*H*0.5,
+      vx:(Math.random()-0.5)*1.6, vy:2.2+Math.random()*3.4,
+      hoek:Math.random()*360, draai:(Math.random()-0.5)*14, w:b, h:hh
+    });
+  }
+  var begin=performance.now(), duur=duurMs||2600;
+  function stap(nu){
+    var verstreken=nu-begin;
+    if(verstreken>duur){ svg.remove(); return; }
+    var vervaag = verstreken>duur-600 ? (duur-verstreken)/600 : 1;
+    svg.style.opacity=vervaag;
+    for(var i=0;i<stukken.length;i++){
+      var p=stukken[i];
+      p.x+=p.vx; p.y+=p.vy; p.hoek+=p.draai; p.vy+=0.04;
+      p.el.setAttribute('transform','translate('+(p.x-p.w/2)+' '+(p.y-p.h/2)+') rotate('+p.hoek+' '+(p.w/2)+' '+(p.h/2)+')');
+    }
+    requestAnimationFrame(stap);
+  }
+  requestAnimationFrame(stap);
+}
+/* Eén ingang voor alle vieringen, zodat geluid en beeld samen blijven lopen. */
+function vier(soort){
+  geluid(soort==='level'||soort==='pass'?soort:(soort==='groot'?'groot':'klein'));
+  confetti(soort==='groot'?120:soort==='level'?90:55, soort==='groot'?3200:2400);
 }
 function toast(t){ var n=$('#toast'); n.textContent=t; n.classList.add('on'); clearTimeout(n._t); n._t=setTimeout(function(){n.classList.remove('on')},2600); }
 
@@ -842,6 +1008,20 @@ function dagBij(){
   var gister=g.getFullYear()+'-'+String(g.getMonth()+1).padStart(2,'0')+'-'+String(g.getDate()).padStart(2,'0');
   S.streak = (S.laatsteDag===gister) ? S.streak+1 : 1;
   S.laatsteDag=t; geefXP(20,'dag '+S.streak); bewaar();
+}
+/* Rondt een taak af en kijkt of daarmee de hele dag klaar is. */
+function voltooiTaak(sleutel){
+  dagBij();
+  if(!taakKlaar(sleutel)) return;          // vandaag al afgevinkt: geen dubbele beloning
+  var dag=huidigeDag(), taken=dagTaken(dag), d=dagState();
+  var af=taken.filter(function(t){ return d.taken[t.k]; }).length;
+  if(af===taken.length && taken.length && !S.dagenGedaan[dag]){
+    S.dagenGedaan[dag]=1; bewaar();
+    setTimeout(function(){ geefXP(50,'dag '+dag+' afgerond'); vier('groot');
+      toast('Dag '+dag+' afgerond. Alles van vandaag staat.'); }, 500);
+  } else {
+    toast(af+' van '+taken.length+' taken klaar vandaag');
+  }
 }
 
 /* ======================= BORDEN ======================= */
@@ -888,6 +1068,7 @@ function toonVraag(q, opts){
     var nb=el('button','btn wide','Volgende'); nb.onclick=function(){ opts.next&&opts.next(goed); };
     box.appendChild(nb); nb.focus();
     S.gezien[q.id]=1;
+    geluid(goed?'goed':'fout'); telAntwoord(goed);
     var st=S.mod[q.mod]; if(st){ goed?st.goed++:st.fout++; }
     if(goed){ geefXP(10,'goed'); S.fout=S.fout.filter(function(x){return x!==q.id}); }
     else { if(S.fout.indexOf(q.id)<0) S.fout.push(q.id); }
@@ -1132,44 +1313,148 @@ function tekenNav(){
 function teken(){
   kopBij(); tekenNav();
   var v=$('#view'); v.innerHTML='';
-  ({vandaag:vVandaag, leren:vLeren, borden:vBorden, examen:vExamen, pass:vPass}[TAB]||vVandaag)(v);
+  ({vandaag:vVandaag, leren:vLeren, borden:vBorden, examen:vExamen, pass:vPass, instel:vInstel}[TAB]||vVandaag)(v);
+}
+
+/* ---------- INSTELLINGEN ---------- */
+function vInstel(v){
+  var h=el('div','stack');
+  h.appendChild(el('h2',null,'Instellingen'));
+
+  var c=el('div','card stack');
+  c.appendChild(el('div','eyebrow','Geluid en beeld'));
+  function schakel(label, uitleg, waarde, zetter){
+    var r=el('div','schakel');
+    var tx=el('div'); tx.style.minWidth='0';
+    var lb=el('div',null,label); lb.style.fontWeight='600'; tx.appendChild(lb);
+    tx.appendChild(el('div','small muted',uitleg));
+    r.appendChild(tx);
+    var knop=el('button','tuimel'); knop.type='button';
+    knop.setAttribute('role','switch');
+    function toon(){ knop.setAttribute('aria-checked', waarde()?'true':'false'); knop.dataset.aan = waarde()?'1':'0'; }
+    knop.appendChild(el('span','dop'));
+    knop.onclick=function(){ zetter(!waarde()); bewaar(); toon(); if(waarde()) geluid('goed'); };
+    toon(); r.appendChild(knop);
+    return r;
+  }
+  c.appendChild(schakel('Geluid','Korte tonen bij een goed of fout antwoord en bij een viering.',
+    function(){return S.instel.geluid;}, function(x){S.instel.geluid=x;}));
+  c.appendChild(schakel('Confetti en animaties','De confetti bij een afgeronde dag en de bewegende puzzels.',
+    function(){return S.instel.animatie;}, function(x){S.instel.animatie=x;}));
+  c.appendChild(el('div','art','Staat je telefoon of computer op "verminder beweging", dan blijven animaties sowieso uit.'));
+  h.appendChild(c);
+
+  var t=el('div','card stack');
+  t.appendChild(el('div','eyebrow','Weergave'));
+  var tb=el('button','btn sec wide','Licht of donker wisselen');
+  tb.onclick=function(){ $('#themebtn').click(); };
+  t.appendChild(tb);
+  h.appendChild(t);
+
+  var o=el('div','card stack');
+  o.appendChild(el('div','eyebrow','Voortgang'));
+  o.appendChild(el('div','small muted', bron==='account'
+    ? 'Je voortgang staat in je account en werkt op elk apparaat waar je ingelogd bent.'
+    : 'Je voortgang staat in deze browser. Op een ander apparaat begin je opnieuw.'));
+  o.appendChild(el('div','small muted','Totaal '+S.xp+' XP · level '+level()+' · reeks '+S.streak+' dagen · '+
+    Object.keys(S.dagenGedaan).length+' van 14 dagen afgerond.'));
+  var wis=el('button','btn sec wide','Voortgang wissen');
+  wis.onclick=function(){
+    if(wis.dataset.zeker!=='1'){ wis.dataset.zeker='1'; wis.textContent='Zeker weten? Klik nog een keer'; return; }
+    S.xp=0; S.streak=0; S.laatsteDag=null; S.dagenGedaan={}; S.fout=[]; S.examens=[];
+    S.leitner={}; S.gezien={}; S.dag={datum:'',taken:{},xp:0,goed:0,fout:0};
+    MODULES.forEach(function(m){ S.mod[m.id]={goed:0,fout:0,les:0}; });
+    bewaar(); toast('Voortgang gewist'); TAB='vandaag'; teken();
+  };
+  o.appendChild(wis);
+  h.appendChild(o);
+
+  var ab=el('button','btn wide','Terug'); ab.onclick=function(){ TAB='vandaag'; teken(); };
+  h.appendChild(ab);
+  v.appendChild(h);
 }
 
 /* ---------- VANDAAG ---------- */
 function vVandaag(v){
-  var dag=huidigeDag(), plan=DAGPLAN[dag-1];
+  var dag=huidigeDag(), plan=DAGPLAN[dag-1], d=dagState();
+  var taken=dagTaken(dag);
+  var af=taken.filter(function(t){ return d.taken[t.k]; }).length;
+  var alles = af===taken.length && taken.length>0;
+  var mod = plan && plan.mod ? MODULES.filter(function(m){return m.id===plan.mod})[0] : null;
   var h=el('div','stack');
+
+  /* ---- Kop: wat heb je vandaag gedaan ---- */
   var top=el('div','card stack');
-  top.appendChild(el('div','eyebrow','Dag '+dag+' van 14'));
-  top.appendChild(el('h2', null, dag<=10 ? ('Module: '+(MODULES.filter(function(m){return m.id===plan.mod})[0]||{}).titel) : 'Herhalen en proefexamen'));
-  top.appendChild(el('div','small muted', dag<=10 ? 'Lees de kaartjes, maak de quiz en de puzzel. Reken op 30 tot 45 minuten.' : 'Maak elke dag een proefexamen en werk je foutenbak weg.'));
-  var pb=el('div','bar'); var pi=el('i'); pi.style.width=Math.round((dag-1)/14*100)+'%'; pb.appendChild(pi); top.appendChild(pb);
+  var kop=el('div','dagkop');
+  var r=40, C=2*Math.PI*r, pct=taken.length? af/taken.length : 0;
+  var ringEl=el('div','dagring');
+  ringEl.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true">'+
+    '<circle cx="50" cy="50" r="'+r+'" fill="none" stroke="var(--surface-2)" stroke-width="12"/>'+
+    '<circle cx="50" cy="50" r="'+r+'" fill="none" stroke="'+(alles?'var(--goed)':'var(--blauw)')+'" stroke-width="12" stroke-linecap="round" '+
+    'stroke-dasharray="'+C+'" stroke-dashoffset="'+(C-C*pct)+'" transform="rotate(-90 50 50)"/>'+
+    (alles
+      ? '<path d="M33 51l12 12 22-26" fill="none" stroke="var(--goed)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>'
+      : '<text x="50" y="50" text-anchor="middle" dominant-baseline="central" fill="var(--fg)" font-family="Archivo, Arial" font-weight="800" font-size="30">'+af+'</text>')+
+    '</svg>';
+  kop.appendChild(ringEl);
+  var kt=el('div'); kt.style.minWidth='0';
+  kt.appendChild(el('div','eyebrow','Vandaag · dag '+dag+' van 14'));
+  kt.appendChild(el('h2',null, alles ? 'Dag '+dag+' afgerond' : (af===0 ? 'Nog niets gedaan vandaag' : af+' van '+taken.length+' klaar')));
+  kt.appendChild(el('div','small muted', alles
+    ? 'Mooi gedaan. Morgen gaat het verder met dag '+Math.min(dag+1,14)+'.'
+    : (dag<=10 && mod ? 'Module: '+mod.titel : 'Herhalen en proefexamen')));
+  kop.appendChild(kt);
+  top.appendChild(kop);
+
+  /* Drie cijfers over vandaag, zodat je je inspanning terugziet. */
+  var cij=el('div','cijfers');
+  var totaal=d.goed+d.fout;
+  [['XP vandaag', '+'+d.xp],
+   ['Vragen', totaal ? d.goed+'/'+totaal+' goed' : '—'],
+   ['Reeks', S.streak+(S.streak===1?' dag':' dagen')]].forEach(function(p){
+    var c=el('div','cijfer');
+    c.appendChild(el('div','cv tnum',p[1]));
+    c.appendChild(el('div','cl',p[0]));
+    cij.appendChild(c);
+  });
+  top.appendChild(cij);
   h.appendChild(top);
 
+  /* ---- De taken van vandaag, met hun staat ---- */
   var acties=el('div','stack');
-  if(dag<=10){
-    var mod=MODULES.filter(function(m){return m.id===plan.mod})[0];
-    if(mod){
-      acties.appendChild(knopKaart('Lesstof lezen', mod.lessons.length+' kaartjes · '+mod.titel, function(){ startLes(mod); }));
-      acties.appendChild(knopKaart('Quiz', '10 vragen uit '+mod.titel, function(){ startQuiz(schud(mod.questions).slice(0,10), 'Quiz · '+mod.titel); }));
-      acties.appendChild(knopKaart('Flashcards borden', '20 borden volgens het Leitner-systeem', function(){ TAB='borden'; teken(); startFlash(); }));
-      if(mod.puzzles.length) acties.appendChild(knopKaart('Situatiepuzzel', mod.puzzles.length+' kruispunten', function(){ startPuzzels(mod); }));
-    }
-  } else {
-    acties.appendChild(knopKaart('Proefexamen', EXAM.vragen+' vragen · '+EXAM.minuten+' minuten · '+EXAM.grens+' goed om te slagen', function(){ TAB='examen'; teken(); startExamen(); }));
+  function taakKaart(k, titel, sub, fn){
+    return knopKaart(titel, sub, fn, !!d.taken[k]);
   }
-  if(S.fout.length) acties.appendChild(knopKaart('Foutenbak wegwerken', S.fout.length+' vragen die je fout had', function(){
-    startQuiz(S.fout.map(vraagById).filter(Boolean).slice(0,15), 'Foutenbak'); }));
+  if(dag<=10 && mod){
+    acties.appendChild(taakKaart('les','Lesstof lezen', mod.lessons.length+' kaartjes · '+mod.titel, function(){ startLes(mod); }));
+    acties.appendChild(taakKaart('quiz','Quiz', '10 vragen uit '+mod.titel, function(){ startQuiz(schud(mod.questions).slice(0,10), 'Quiz · '+mod.titel, 'quiz'); }));
+    acties.appendChild(taakKaart('borden','Flashcards borden', '20 borden volgens het Leitner-systeem', function(){ TAB='borden'; teken(); startFlash(); }));
+    if(mod.puzzles.length) acties.appendChild(taakKaart('puzzel','Situatiepuzzel', mod.puzzles.length+' kruispunten', function(){ startPuzzels(mod); }));
+  } else {
+    acties.appendChild(taakKaart('examen','Proefexamen', EXAM.vragen+' vragen · '+EXAM.minuten+' minuten · '+EXAM.grens+' goed om te slagen', function(){ TAB='examen'; teken(); startExamen(); }));
+    acties.appendChild(taakKaart('fouten','Foutenbak', S.fout.length?S.fout.length+' vragen die je fout had':'Je foutenbak is leeg', function(){
+      if(!S.fout.length){ toast('Je foutenbak is leeg'); return; }
+      startQuiz(S.fout.map(vraagById).filter(Boolean).slice(0,15), 'Foutenbak', 'fouten'); }));
+  }
+  if(dag<=10 && S.fout.length) acties.appendChild(knopKaart('Foutenbak wegwerken', S.fout.length+' vragen die je fout had', function(){
+    startQuiz(S.fout.map(vraagById).filter(Boolean).slice(0,15), 'Foutenbak'); }, false));
   h.appendChild(acties);
 
-  var klaar=el('div','card stack');
-  klaar.appendChild(el('div','eyebrow','Dag afronden'));
-  klaar.appendChild(el('div','small muted','Vink de dag af als je klaar bent. Je krijgt 50 XP en je reeks loopt door.'));
-  var kb=el('button','btn wide', S.dagenGedaan[dag]?'Dag '+dag+' is afgerond':'Dag '+dag+' afronden');
-  kb.disabled=!!S.dagenGedaan[dag];
-  kb.onclick=function(){ S.dagenGedaan[dag]=1; dagBij(); geefXP(50,'dag afgerond'); bewaar(); teken(); };
-  klaar.appendChild(kb);
-  h.appendChild(klaar);
+  /* ---- De veertien dagen in één oogopslag ---- */
+  var pl=el('div','card stack');
+  pl.appendChild(el('div','eyebrow','Jouw 14 dagen'));
+  var strip=el('div','dagen');
+  for(var i=1;i<=14;i++){
+    var vak=el('div','dagvak tnum',String(i));
+    if(S.dagenGedaan[i]) vak.dataset.st='af';
+    else if(i===dag) vak.dataset.st='nu';
+    vak.title='Dag '+i+(S.dagenGedaan[i]?' · afgerond':i===dag?' · vandaag':'');
+    strip.appendChild(vak);
+  }
+  pl.appendChild(strip);
+  var afTot=Object.keys(S.dagenGedaan).length;
+  pl.appendChild(el('div','small muted', afTot+' van 14 dagen afgerond'));
+  h.appendChild(pl);
 
   var st=el('div','card stack');
   st.appendChild(el('div','eyebrow','Hoe sta je ervoor'));
@@ -1181,11 +1466,20 @@ function vVandaag(v){
   h.appendChild(st);
   v.appendChild(h);
 }
-function knopKaart(titel, sub, fn){
-  var b=el('button','card modcard'); b.style.setProperty('--c','var(--blauw)'); b.type='button';
-  var box=el('div'); box.style.flex='1'; box.appendChild(el('div',null,titel)); box.querySelector('div').style.fontWeight='600';
-  box.appendChild(el('div','small muted',sub));
-  b.appendChild(box); b.appendChild(el('div','muted','›')); b.querySelector('div:last-child').style.fontSize='22px';
+function knopKaart(titel, sub, fn, gedaan){
+  var b=el('button','card modcard'+(gedaan?' gedaan':'')); b.type='button';
+  b.style.setProperty('--c', gedaan?'var(--goed)':'var(--blauw)');
+  var vink=el('div','vink');
+  vink.innerHTML = gedaan
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--goed)"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.6" fill="none" stroke="var(--line)" stroke-width="1.8"/></svg>';
+  b.appendChild(vink);
+  var box=el('div'); box.style.flex='1'; box.style.minWidth='0';
+  var t=el('div',null,titel); t.style.fontWeight='600'; box.appendChild(t);
+  box.appendChild(el('div','small muted', gedaan ? sub+' · vandaag gedaan' : sub));
+  b.appendChild(box);
+  var pijl=el('div','muted', gedaan?'↻':'›'); pijl.style.fontSize = gedaan?'16px':'22px';
+  b.appendChild(pijl);
   b.onclick=fn; return b;
 }
 function modStatKaart(m){
@@ -1246,7 +1540,8 @@ function startLes(m){
     nb.textContent = i===m.lessons.length-1 ? 'Klaar · quiz starten' : 'Volgende';
     nb.onclick=function(){
       if(i===m.lessons.length-1){ S.mod[m.id].les=m.lessons.length; geefXP(15,'lesstof gelezen'); bewaar();
-        startQuiz(schud(m.questions).slice(0,10),'Quiz · '+m.titel); }
+        voltooiTaak('les');
+        startQuiz(schud(m.questions).slice(0,10),'Quiz · '+m.titel,'quiz'); }
       else { i++; toon(); }
     };
     row.appendChild(vb); row.appendChild(nb); h.appendChild(row);
@@ -1258,7 +1553,7 @@ function startLes(m){
 }
 
 /* ---------- QUIZ ---------- */
-function startQuiz(lijst, titel){
+function startQuiz(lijst, titel, taak){
   if(!lijst||!lijst.length){ toast('Geen vragen beschikbaar'); return; }
   var i=0, goed=0;
   function toon(){
@@ -1284,13 +1579,16 @@ function startQuiz(lijst, titel){
     c.appendChild(el('div','muted',pct>=88?'Dit is examenniveau.':pct>=70?'Bijna goed. Herhaal je fouten.':'Lees de lesstof nog een keer door.'));
     if(pct===100) { geefXP(30,'foutloos'); c.appendChild(el('div','pill','Foutloos · bonus 30 XP')); }
     h.appendChild(c);
+    if(pct>=80) vier(pct===100?'groot':'klein'); else geluid('fout');
     if(S.fout.length){
       var fb=el('button','btn wide','Foutenbak oefenen ('+S.fout.length+')');
       fb.onclick=function(){ startQuiz(S.fout.map(vraagById).filter(Boolean).slice(0,15),'Foutenbak'); };
       h.appendChild(fb);
     }
     var ab=el('button','btn sec wide','Terug naar overzicht'); ab.onclick=function(){teken()}; h.appendChild(ab);
-    v.appendChild(h); $('#main').scrollTop=0; dagBij();
+    v.appendChild(h); $('#main').scrollTop=0;
+    // Een quiz telt pas als dagtaak bij vijf vragen of meer.
+    if(taak && lijst.length>=5) voltooiTaak(taak); else dagBij();
   }
   toon();
 }
@@ -1338,7 +1636,7 @@ function startPuzzels(m){
       c.appendChild(fb); ok.remove();
       if(g2){ goed++; geefXP(15,'puzzel'); }
       var nb=el('button','btn wide', i===lijst.length-1?'Klaar':'Volgende puzzel');
-      nb.onclick=function(){ i++; if(i<lijst.length) toon(); else { toast('Puzzels: '+goed+' van '+lijst.length+' goed'); dagBij(); teken(); } };
+      nb.onclick=function(){ i++; if(i<lijst.length) toon(); else { if(goed===lijst.length) vier('klein'); toast('Puzzels: '+goed+' van '+lijst.length+' goed'); voltooiTaak('puzzel'); teken(); } };
       c.appendChild(nb); nb.focus();
     };
     c.appendChild(ok);
@@ -1427,7 +1725,7 @@ function startFlash(){
         cc.appendChild(el('div','muted','Borden die je niet wist komen morgen weer terug.'));
         e.appendChild(cc);
         var ab2=el('button','btn wide','Terug'); ab2.onclick=function(){TAB='borden';teken()}; e.appendChild(ab2);
-        v2.appendChild(e); dagBij();
+        v2.appendChild(e); if(goed===stapel.length) vier('klein'); voltooiTaak('borden');
       }
     }
     ok.onclick=function(){verder(true)}; fout.onclick=function(){verder(false)};
@@ -1471,7 +1769,7 @@ function startBordQuiz(){
         fb.appendChild(el('div','small',Q.s.b));
         c.appendChild(fb);
         var nb=el('button','btn wide', i===vragen.length-1?'Klaar':'Volgende');
-        nb.onclick=function(){ i++; if(i<vragen.length) toon(); else { toast('Bordenquiz: '+goed+'/'+vragen.length); dagBij(); TAB='borden'; teken(); } };
+        nb.onclick=function(){ i++; if(i<vragen.length) toon(); else { if(goed===vragen.length) vier('klein'); toast('Bordenquiz: '+goed+'/'+vragen.length); voltooiTaak('borden'); TAB='borden'; teken(); } };
         c.appendChild(nb); nb.focus();
       };
       grid.appendChild(t);
@@ -1630,7 +1928,7 @@ function eindExamen(){
   var geslaagd = goed>=grens;
   S.examens.push({datum:vandaagStr(), goed:goed, totaal:E.vragen.length, gezakt:!geslaagd});
   if(S.examens.length>25) S.examens=S.examens.slice(-25);
-  geefXP(geslaagd?100:40, 'proefexamen'); dagBij(); bewaar();
+  geefXP(geslaagd?100:40, 'proefexamen'); voltooiTaak('examen'); bewaar();
 
   var v=$('#view'); v.innerHTML='';
   var h=el('div','stack');
@@ -1724,6 +2022,7 @@ function vPass(v){
 }
 
 /* ======================= THEMA ======================= */
+$('#setbtn').onclick=function(){ TAB = (TAB==='instel') ? 'vandaag' : 'instel'; teken(); $('#main').scrollTop=0; };
 $('#themebtn').onclick=function(){
   var r=document.documentElement;
   var nu=r.getAttribute('data-theme');
