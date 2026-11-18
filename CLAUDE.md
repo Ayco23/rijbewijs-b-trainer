@@ -32,6 +32,10 @@ site/                   kant-en-klare map om naar een eigen domein te uploaden
 docs/                   documentatie (lees die)
 ```
 
+In deze repo staat alleen wat gepubliceerd wordt: `index.html` (de gebouwde app),
+`src/` met de bronbestanden, en `docs/` plus `tools/`. De werkmap bevat daarnaast
+`borden-download/` en `site/`.
+
 `content-signs.js` is **oud en ongebruikt** — de nagetekende borden van vóór de officiële set.
 Niet laden, kan weg.
 

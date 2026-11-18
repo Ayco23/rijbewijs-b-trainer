@@ -44,4 +44,14 @@ Begin bij [CLAUDE.md](CLAUDE.md) — dat is het startpunt voor wie aan deze app 
 
 ## Scripts
 
+```bash
+node tools/controleer.js   # valideert de content en de koppeling met de app
+node tools/bouw.js         # bouwt de drie publicatievormen
+node tools/bouw-borden.js  # bouwt borden.js uit de gedownloade SVG-tekeningen
+```
+
+`controleer.js` vangt structuurfouten, geen inhoudelijke. Een vraag kan er groen doorheen
+komen en toch het verkeerde antwoord bevatten; daarvoor moet de content tegen de wettekst
+gelegd worden.
+
 
