@@ -31,3 +31,17 @@ voorbeeldvragen van het CBR.
 
 `index.html` in de hoofdmap wordt uit `src/` samengesteld; bewerk dus de bron en niet
 het samengestelde bestand.
+
+## Documentatie
+
+Begin bij [CLAUDE.md](CLAUDE.md) — dat is het startpunt voor wie aan deze app gaat werken.
+
+- [docs/architectuur.md](docs/architectuur.md) — opbouw van de app, state, tekenen, hulpfuncties
+- [docs/content-en-bronnen.md](docs/content-en-bronnen.md) — datamodel en de geverifieerde tabel met wetsartikelen
+- [docs/publiceren.md](docs/publiceren.md) — de drie publicatievormen en wat de CSP toestaat
+- [docs/status-en-openstaand.md](docs/status-en-openstaand.md) — wat af is, wat niet, en de bugs die eruit kwamen
+- [docs/plan-volgende-ronde.md](docs/plan-volgende-ronde.md) — het plan voor de volgende ronde
+
+## Scripts
+
+
