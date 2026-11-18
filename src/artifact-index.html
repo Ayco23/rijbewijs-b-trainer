@@ -188,6 +188,53 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:5px
 .pilv{width:13px;height:13px;flex:0 0 auto}
 .btn.sec.gedaan{border-color:var(--goed);color:var(--goed)}
 
+/* ---- Leren: segmentknop en accordeon ---- */
+.seg{display:flex;gap:4px;padding:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:11px}
+.segknop{flex:1;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:var(--fg-2);
+  font:600 13.5px var(--f-body);cursor:pointer}
+.segknop.aan{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+/* Acht rijen van ~56px: samen passen ze op één telefoonscherm, zodat je in
+   één blik ziet hoe ver je met elke module bent. */
+.leerlijst{padding:0;overflow:hidden}
+.leerblok{border-bottom:1px solid var(--line)}
+.leerblok:last-child{border-bottom:0}
+.leerblok.nu{background:var(--blauw-zacht)}
+.leerrij{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:8px 12px;
+  background:transparent;border:0;border-left:3px solid transparent;cursor:pointer;text-align:left;color:var(--fg)}
+.leerblok.nu>.leerrij{border-left-color:var(--c)}
+.leerico{flex:0 0 auto;width:26px;line-height:0}
+.leermid{flex:1;min-width:0;display:block}
+.leertitel{display:block;font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.leerbar{display:block;height:5px;margin-top:5px}
+.leerbar i{display:block;height:100%;border-radius:99px;transition:width .3s}
+.leerpct{flex:0 0 auto;font-family:var(--f-disp);font-size:12px;font-weight:700;color:var(--fg-2);min-width:34px;text-align:right}
+.leermed{flex:0 0 auto;font-size:10.5px;color:var(--fg-3);min-width:46px;text-align:right;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.leerchev{flex:0 0 auto;color:var(--fg-3);line-height:0;transition:transform .2s}
+.leerblok.open .leerchev{transform:rotate(90deg)}
+.leerpaneel{padding:0 12px 14px;border-left:3px solid var(--c)}
+@media(max-width:380px){.leermed{display:none}}
+
+/* ---- tekening bij een leskaart ---- */
+.lesill{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:8px;line-height:0}
+.lesill svg{display:block;width:100%;height:auto}
+
+/* ---- collectie ---- */
+.g-poke{grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:6px}
+.pokevak{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);
+  display:grid;place-items:center;padding:2px;cursor:default}
+.pokevak img{width:100%;height:auto;max-height:100%;image-rendering:pixelated;display:block}
+/* Nog niet gevangen: een silhouet, zodat je wel ziet wat er te halen valt. */
+.pokevak:not(.heb) img{filter:brightness(0) opacity(.22)}
+:root[data-theme="dark"] .pokevak:not(.heb) img{filter:brightness(0) invert(1) opacity(.2)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .pokevak:not(.heb) img{filter:brightness(0) invert(1) opacity(.2)}}
+.pokevak.heb{cursor:pointer;background:var(--surface);border-color:var(--line)}
+.pokevak.shiny{border-color:var(--geel);box-shadow:inset 0 0 0 1px var(--geel)}
+.pokenr{position:absolute;left:4px;bottom:2px;font-family:var(--f-disp);font-size:9px;color:var(--fg-3);line-height:1}
+.pokedetail{border-left:4px solid var(--geel)}
+.pokekop{display:flex;gap:12px;align-items:center}
+.pokegroot{flex:0 0 auto;image-rendering:pixelated}
+
 /* ---- vandaag: cijfers en dagstrip ---- */
 .cijfers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:2px}
 .cijfer{background:var(--surface-2);border-radius:10px;padding:9px 8px;text-align:center;min-width:0}
@@ -245,6 +292,12 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:5px
 <script src="content-modules.js"></script>
 <script src="content-modules2.js"></script>
 <script src="content-extra.js"></script>
+<script src="illustraties.js"></script>
+<script src="poke-namen.js"></script>
+<!-- Sprites zitten hier ingebakken omdat de artifact-CSP externe afbeeldingen
+     blokkeert. Dit bestand gaat niet mee naar de publieke repo; die variant
+     laadt de tekeningen van PokeAPI. Zie tools/bouw.js. -->
+<script src="poke-sprites.js"></script>
 <script>
 (function(){
 "use strict";
@@ -266,6 +319,9 @@ var S = {
   mod:{}, leitner:{}, fout:[], examens:[], gezien:{},
   // Wat je vandaag gedaan hebt. Wordt vanzelf leeggemaakt zodra het een nieuwe dag is.
   dag:{datum:'', taken:{}, xp:0, goed:0, fout:0, dagnr:0},
+  // Eén beloning per afgeronde programmadag, puur numeriek. S gaat bij elke
+  // wijziging volledig naar de database, dus hier hoort geen base64 in.
+  beloningen:[],   // [{d:dagnummer, p:pokedexnummer, s:shiny 0|1, t:'JJJJ-MM-DD'}]
   instel:{geluid:true, animatie:true}
 };
 MODULES.forEach(function(m){ S.mod[m.id]={goed:0,fout:0,les:0}; });
@@ -288,6 +344,21 @@ function schoon(raw){
     xp:+raw.dag.xp||0, goed:+raw.dag.goed||0, fout:+raw.dag.fout||0,
     dagnr:+raw.dag.dagnr||0
   };
+  /* Beloningen worden gemerget op dagnummer in plaats van vervangen. initOpslag
+     laat de serverversie winnen zodra daar meer XP in zit; zonder deze merge
+     zou een oudere serverversie de hele collectie wissen. */
+  if(Array.isArray(raw.beloningen)){
+    var bezetDag={};
+    S.beloningen.forEach(function(b){ bezetDag[b.d]=1; });
+    raw.beloningen.forEach(function(b){
+      if(!b||typeof b!=='object') return;
+      var d=+b.d, p=+b.p;
+      if(!(d>=1&&d<=14) || !(p>=1&&p<=151) || bezetDag[d]) return;
+      bezetDag[d]=1;
+      S.beloningen.push({d:d, p:p, s:b.s?1:0, t:typeof b.t==='string'?b.t:''});
+    });
+    S.beloningen.sort(function(a,b){ return a.d-b.d; });
+  }
   if(raw.instel&&typeof raw.instel==='object'){
     S.instel.geluid   = raw.instel.geluid!==false;
     S.instel.animatie = raw.instel.animatie!==false;
@@ -326,7 +397,11 @@ function bewaar(){
   },700); }
 }
 async function initOpslag(){
-  laadLokaal(); teken();
+  /* Wie al dagen had afgerond voordat de beloningen bestonden, krijgt ze hier
+     alsnog. Geen bewaar(): de uitkomst is deterministisch, dus de eerstvolgende
+     echte wijziging legt precies hetzelfde vast. Opslaan in een opstartpad is
+     bovendien precies waar het eerder misging. */
+  laadLokaal(); vulBeloningenTerug(); teken();
   try{
     var user = await (window.claude && window.claude.use ? window.claude.use('user') : null);
     var d = await (window.claude && window.claude.use ? window.claude.use('db') : null);
@@ -336,6 +411,8 @@ async function initOpslag(){
     var data = doc && (doc.data ? (typeof doc.data==='function'?doc.data():doc.data) : null);
     if(data && typeof data.xp==='number' && data.xp>=S.xp){ schoon(data); bron='account'; }
     else if(S.xp>0){ bewaar(); }
+    // De serverversie kan dagen bevatten die hier nog geen beloning hadden.
+    if(vulBeloningenTerug()) bewaar();
     bron='account'; teken(); toast('Voortgang gesynchroniseerd met je account');
   }catch(e){ /* lokaal blijft werken */ }
 }
@@ -573,12 +650,144 @@ function voltooiTaak(sleutel){
   var dag=huidigeDag(), taken=dagTaken(dag), d=dagState();
   var af=taken.filter(function(t){ return d.taken[t.k]; }).length;
   if(af===taken.length && taken.length && !S.dagenGedaan[dag]){
-    S.dagenGedaan[dag]=1; bewaar();
+    S.dagenGedaan[dag]=1;
+    var bel = kenBeloningToe(dag);   // zelf idempotent, naast de guard hierboven
+    bewaar();
     setTimeout(function(){ geefXP(50,'dag '+dag+' afgerond'); vier('groot');
-      toast('Dag '+dag+' afgerond. Alles van vandaag staat.'); }, 500);
+      if(bel){
+        speelCry(bel.p);
+        toast('Dag '+dag+' afgerond. Je ving '+(bel.s?'een shiny ':'')+pokeNaam(bel.p)+'.');
+      } else {
+        toast('Dag '+dag+' afgerond. Alles van vandaag staat.');
+      }
+    }, 500);
   } else {
     toast(af+' van '+taken.length+' taken klaar vandaag');
   }
+}
+
+/* ======================= BELONINGEN (Pokemon) ======================= */
+/* Elke afgeronde programmadag levert een Pokemon op. De app kent alleen het
+   pokedexnummer; sprite, cry en naam volgen daaruit. Zo blijft S klein genoeg
+   om bij elke wijziging naar de database te gaan.
+
+   Welke je krijgt volgt deterministisch uit het dagnummer, niet uit
+   Math.random(). Anders geeft herladen of synchroniseren een andere uitkomst
+   dan wat er al in de collectie staat. */
+
+/* Legendaries en starters: alleen op een mijlpaaldag. */
+var POKE_ZELDZAAM = [1,2,3,4,5,6,7,8,9,144,145,146,150,151];
+var POKE_GEWOON = (function(){
+  var uit={}, r=[];
+  POKE_ZELDZAAM.forEach(function(p){ uit[p]=1; });
+  for(var i=1;i<=151;i++) if(!uit[i]) r.push(i);
+  return r;
+})();
+function mijlpaalDag(dag){ return dag%5===0 || dag===14; }
+function pokeNaam(p){
+  var n = window.POKE_NAMEN && window.POKE_NAMEN[p-1];
+  return n || ('Nr. '+p);
+}
+/* Kleine deterministische generator (mulberry32). Hetzelfde zaad geeft altijd
+   dezelfde reeks, dus dag 3 levert op elk apparaat dezelfde Pokemon op. */
+function zaad(n){
+  var a = n>>>0;
+  return function(){
+    a = (a + 0x6D2B79F5)>>>0;
+    var t = a;
+    t = Math.imul(t ^ (t>>>15), t|1);
+    t ^= t + Math.imul(t ^ (t>>>7), t|61);
+    return (((t ^ (t>>>14))>>>0) / 4294967296);
+  };
+}
+/* Trekt uit de pool en schuift door zolang je dat nummer al hebt. */
+function trekPoke(pool, rnd, bezet){
+  var start = Math.floor(rnd()*pool.length) % pool.length;
+  for(var i=0;i<pool.length;i++){
+    var p = pool[(start+i)%pool.length];
+    if(!bezet[p]) return p;
+  }
+  return pool[start];   // alles al bezeten: dan maar een dubbele
+}
+/* Idempotent op het dagnummer: tweemaal aanroepen voor dezelfde dag geeft
+   nooit een tweede beloning. `stil` is het terugvullen achteraf — dan telt de
+   foutloze dag van vandaag niet mee, want die ging over een andere dag. */
+function kenBeloningToe(dag, stil){
+  if(!(dag>=1&&dag<=14)) return null;
+  for(var i=0;i<S.beloningen.length;i++) if(S.beloningen[i].d===dag) return null;
+  var rnd = zaad(dag*7919+104729);
+  var bezet={};
+  S.beloningen.forEach(function(b){ bezet[b.p]=1; });
+  var p = trekPoke(mijlpaalDag(dag)?POKE_ZELDZAAM:POKE_GEWOON, rnd, bezet);
+  /* Shiny verdien je: een foutloze dag geeft hem altijd. Daarnaast een kleine
+     vaste kans, zodat het niet alleen voor de perfecte dagen is weggelegd. */
+  var d = dagState();
+  var foutloos = !stil && d.fout===0 && (d.goed+d.fout)>=10;
+  var shiny = foutloos || rnd()<0.0625;
+  var b = {d:dag, p:p, s:shiny?1:0, t:vandaagStr()};
+  S.beloningen.push(b);
+  S.beloningen.sort(function(a,b2){ return a.d-b2.d; });
+  return b;
+}
+/* Wie al dagen had afgerond voordat dit bestond, krijgt ze alsnog: stil, zonder
+   confetti, zodat het Collectie-tabblad niet leeg opent. */
+function vulBeloningenTerug(){
+  var nieuw=0;
+  for(var dag=1;dag<=14;dag++) if(S.dagenGedaan[dag] && kenBeloningToe(dag,true)) nieuw++;
+  return nieuw;
+}
+
+/* ---------- Sprite en geluid ---------- */
+/* De artifact-CSP blokkeert externe afbeeldingen, dus daar zitten de sprites
+   als data-URI in poke-assets.js. Dat bestand gaat bewust niet mee naar de
+   publieke repo (de tekeningen zijn van The Pokemon Company); die variant laadt
+   ze van PokeAPI. Dat is deze ene if. */
+function spriteBron(id, shiny){
+  var bron = shiny ? window.POKE_SHINY : window.POKE_SPRITE;
+  if(bron && bron[id]) return 'data:image/png;base64,'+bron[id];
+  return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+
+         (shiny?'shiny/':'')+id+'.png';
+}
+/* Alleen náást de artifact gepubliceerd; elders bestaat dit pad niet en valt
+   het geluid terug op de synth. */
+function cryBron(id){ return 'poke/cry/'+id+'.ogg'; }
+
+/* Safari en iOS spelen geen Ogg Vorbis en falen daarbij stil. Eén keer vragen
+   is genoeg; daarna weten we het voor de hele sessie. */
+var KAN_OGG = (function(){
+  try{ return !!document.createElement('audio').canPlayType('audio/ogg; codecs="vorbis"'); }
+  catch(e){ return false; }
+})();
+/* Elk pokedexnummer krijgt zijn eigen reeks tonen, zodat de terugval niet voor
+   alle 151 hetzelfde piepje is. Respecteert S.instel.geluid via tonen(). */
+function synthCry(id){
+  var rnd = zaad(id*2654435761);
+  var basis = 300 + (id%24)*18;
+  var reeks = [], t = 0;
+  for(var i=0;i<4;i++){
+    var f = basis * (1 + Math.floor(rnd()*7)/6);
+    var duur = 0.07 + rnd()*0.08;
+    reeks.push([Math.round(f), t, duur]);
+    t += duur*0.8;
+  }
+  tonen(reeks, (id%3===0)?'triangle':'sawtooth', 0.07);
+}
+/* Start het geluid meteen bij de klik: iOS laat audio alleen binnen de
+   gebruikersactie toe. Elke tak die misgaat valt terug op de synth. */
+function speelCry(id){
+  if(!S.instel.geluid) return;
+  if(!KAN_OGG){ synthCry(id); return; }
+  var gedaan = false;
+  function terugval(){ if(gedaan) return; gedaan=true; synthCry(id); }
+  try{
+    var a = new Audio(cryBron(id));
+    a.volume = 0.5;
+    a.addEventListener('error', terugval);
+    a.addEventListener('playing', function(){ gedaan = true; });
+    var pr = a.play();
+    if(pr && pr.catch) pr.catch(terugval);
+    setTimeout(terugval, 900);   // stil mislukt: dan alsnog een geluidje
+  }catch(e){ terugval(); }
 }
 
 /* ======================= BORDEN ======================= */
@@ -900,10 +1109,16 @@ var TAB='vandaag';
 var TABS=[
   {id:'vandaag', nm:'Vandaag', ic:'<path d="M3 9h18M7 3v4M17 3v4"/><rect x="3" y="5" width="18" height="16" rx="2"/>'},
   {id:'leren',   nm:'Leren',   ic:'<path d="M4 5a2 2 0 012-2h12a2 2 0 012 2v16l-8-4-8 4z"/>'},
-  {id:'borden',  nm:'Borden',  ic:'<path d="M12 2l9 9-9 9-9-9z"/><path d="M12 8v4M12 15h.01"/>'},
   {id:'examen',  nm:'Examen',  ic:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'},
+  {id:'collectie', nm:'Collectie', ic:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/>'},
   {id:'pass',    nm:'Pass',    ic:'<path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6L12 16.8 6.7 19.6l1.1-6L3.4 9.4l6-.8z"/>'}
 ];
+/* Borden is geen eigen tabblad meer maar een segment binnen Leren, zodat
+   Collectie erbij past zonder dat de balk zes knoppen krijgt. Elke oude sprong
+   naar TAB='borden' loopt via deze functie. */
+var LEER_SEG='modules';          // 'modules' | 'borden'
+var OPEN_MOD=null;               // welke accordeonrij openstaat; teken() mag hem niet dichtklappen
+function naarBorden(){ TAB='leren'; LEER_SEG='borden'; }
 function kopBij(){
   var L=levelInfo();
   $('#lvl').textContent=L.n; $('#lvlnm').textContent=L.naam;
@@ -923,7 +1138,10 @@ function tekenNav(){
 function teken(){
   kopBij(); tekenNav();
   var v=$('#view'); v.innerHTML='';
-  ({vandaag:vVandaag, leren:vLeren, borden:vBorden, examen:vExamen, pass:vPass, instel:vInstel}[TAB]||vVandaag)(v);
+  // 'borden' blijft in de dispatch staan: oude opgeslagen of gedeelde toestand
+  // zou anders stil op Vandaag uitkomen.
+  if(TAB==='borden') naarBorden();
+  ({vandaag:vVandaag, leren:vLeren, examen:vExamen, collectie:vCollectie, pass:vPass, instel:vInstel}[TAB]||vVandaag)(v);
 }
 
 /* ---------- INSTELLINGEN ---------- */
@@ -1031,7 +1249,7 @@ function vVandaag(v){
   if(dag<=10 && mod){
     acties.appendChild(taakKaart('les','Lesstof lezen', mod.lessons.length+' kaartjes · '+mod.titel, function(){ startLes(mod); }));
     acties.appendChild(taakKaart('quiz','Quiz', '10 vragen uit '+mod.titel, function(){ startQuiz(schud(mod.questions).slice(0,10), 'Quiz · '+mod.titel, 'quiz'); }));
-    acties.appendChild(taakKaart('borden','Flashcards borden', '20 borden volgens het Leitner-systeem', function(){ TAB='borden'; teken(); startFlash(); }));
+    acties.appendChild(taakKaart('borden','Flashcards borden', '20 borden volgens het Leitner-systeem', function(){ naarBorden(); teken(); startFlash(); }));
     if(mod.puzzles.length) acties.appendChild(taakKaart('puzzel','Situatiepuzzel', mod.puzzles.length+' kruispunten', function(){ startPuzzels(mod); }));
   } else {
     acties.appendChild(taakKaart('examen','Proefexamen', EXAM.vragen+' vragen · '+EXAM.minuten+' minuten · '+EXAM.grens+' goed om te slagen', function(){ TAB='examen'; teken(); startExamen(); }));
@@ -1106,61 +1324,94 @@ function modStatKaart(m){
 }
 
 /* ---------- LEREN ---------- */
+/* Twee segmenten in één tabblad: de modules en de borden. Borden had een eigen
+   knop in de onderbalk; die ruimte is nu voor Collectie. */
 function vLeren(v){
   var h=el('div','stack');
   h.appendChild(el('h2',null,'Leren'));
+
+  var seg=el('div','seg');
+  [['modules','Modules'],['borden','Borden']].forEach(function(p){
+    var b=el('button','segknop'+(LEER_SEG===p[0]?' aan':''), p[1]);
+    b.type='button'; b.setAttribute('aria-pressed', LEER_SEG===p[0]?'true':'false');
+    b.onclick=function(){ LEER_SEG=p[0]; teken(); };
+    seg.appendChild(b);
+  });
+  h.appendChild(seg);
+  v.appendChild(h);
+
+  if(LEER_SEG==='borden'){ vBorden(v, true); return; }
+
   h.appendChild(el('div','small muted','Kies een module. Je leest eerst de kaartjes en maakt daarna de quiz.'));
+
   var planVandaag=DAGPLAN[huidigeDag()-1];
   var plan_mod_vandaag = planVandaag ? planVandaag.mod : null;
-  MODULES.forEach(function(m){
-    var c=el('div','card stack modkaart');
-    c.style.setProperty('--c','var('+m.kleur+')');
-    var kop=el('div','modkop');
-    var ic=el('div','modbadge'); ic.style.color='var('+m.kleur+')'; ic.innerHTML=AFB.modIcoon(m.id,30);
-    kop.appendChild(ic);
-    var kb=el('div'); kb.style.minWidth='0';
-    kb.appendChild(el('div','eyebrow','Module '+m.nr));
-    kb.appendChild(el('h3',null,m.titel));
-    kop.appendChild(kb);
-    c.appendChild(kop);
-    c.appendChild(el('div','small muted',m.samenvatting));
 
-    /* Wat je met deze module al gedaan hebt, zodat je voortgang hier net zo
-       zichtbaar is als op Vandaag. */
+  /* Acht compacte rijen passen samen op één telefoonscherm, zodat je in één
+     blik ziet hoe ver je met elke module bent. Eén rij tegelijk open. */
+  var lijst=el('div','card leerlijst');
+  MODULES.forEach(function(m){
     var st=S.mod[m.id]||{goed:0,fout:0,les:0}, tot=st.goed+st.fout;
     var pct = tot ? Math.round(st.goed/tot*100) : 0;
     var gelezen = st.les>0;
     var medaille = tot<10 ? null : pct>=90?'Goud':pct>=75?'Zilver':pct>=60?'Brons':'Blijf oefenen';
-    var stat=el('div','modstat');
-    var p1=el('span','pil'+(gelezen?' aan':''));
-    p1.innerHTML=(gelezen?'<svg viewBox="0 0 24 24" class="pilv"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
-      + (gelezen?'Lesstof gelezen':'Lesstof nog niet gelezen');
-    stat.appendChild(p1);
-    var p2=el('span','pil'+(tot?' aan':''), tot ? st.goed+' van '+tot+' goed ('+pct+'%)' : 'nog geen vragen gemaakt');
-    stat.appendChild(p2);
-    if(medaille) stat.appendChild(el('span','pil medaille',medaille));
-    var dvandaag=dagState();
-    if(plan_mod_vandaag===m.id){
-      var taken=dagTaken(huidigeDag());
-      var af=taken.filter(function(x){ return dvandaag.taken[x.k]; }).length;
-      stat.appendChild(el('span','pil nu','Module van vandaag · '+af+' van '+taken.length+' taken'));
-    }
-    c.appendChild(stat);
-    if(tot){
-      var bar=el('div','bar'); var bi=el('i'); bi.style.width=pct+'%';
-      bi.style.background='var('+m.kleur+')'; bar.appendChild(bi); c.appendChild(bar);
-    }
+    var open = OPEN_MOD===m.id;
+    var nu = plan_mod_vandaag===m.id;
 
-    var row=el('div'); row.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
-    var b1=el('button','btn sec'+(gelezen?' gedaan':''), (gelezen?'✓ ':'')+'Lesstof ('+m.lessons.length+')');
-    b1.onclick=function(){startLes(m)};
-    var b2=el('button','btn','Quiz ('+m.questions.length+')'); b2.onclick=function(){startQuiz(schud(m.questions),'Quiz · '+m.titel)};
-    row.appendChild(b1); row.appendChild(b2);
-    if(m.puzzles.length){ var b3=el('button','btn sec','Puzzels ('+m.puzzles.length+')'); b3.onclick=function(){startPuzzels(m)}; row.appendChild(b3); }
-    c.appendChild(row);
-    h.appendChild(c);
+    var wrap=el('div','leerblok'+(open?' open':'')+(nu?' nu':''));
+    wrap.style.setProperty('--c','var('+m.kleur+')');
+
+    var rij=el('button','leerrij'); rij.type='button';
+    rij.setAttribute('aria-expanded', open?'true':'false');
+    var ic=el('span','leerico'); ic.style.color='var('+m.kleur+')'; ic.innerHTML=AFB.modIcoon(m.id,22);
+    rij.appendChild(ic);
+
+    var mid=el('span','leermid');
+    mid.appendChild(el('span','leertitel',m.titel));
+    var bar=el('span','bar leerbar'); var bi=el('i');
+    bi.style.width=(tot?pct:0)+'%'; bi.style.background='var('+m.kleur+')';
+    bar.appendChild(bi); mid.appendChild(bar);
+    rij.appendChild(mid);
+
+    rij.appendChild(el('span','leerpct', tot ? pct+'%' : '—'));
+    rij.appendChild(el('span','leermed', medaille||''));
+    var ch=el('span','leerchev');
+    ch.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    rij.appendChild(ch);
+    rij.onclick=function(){ OPEN_MOD = open ? null : m.id; teken(); };
+    wrap.appendChild(rij);
+
+    if(open){
+      var p=el('div','leerpaneel stack');
+      p.appendChild(el('div','eyebrow','Module '+m.nr));
+      p.appendChild(el('div','small muted',m.samenvatting));
+
+      var stat=el('div','modstat');
+      var p1=el('span','pil'+(gelezen?' aan':''));
+      p1.innerHTML=(gelezen?'<svg viewBox="0 0 24 24" class="pilv"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
+        + (gelezen?'Lesstof gelezen':'Lesstof nog niet gelezen');
+      stat.appendChild(p1);
+      stat.appendChild(el('span','pil'+(tot?' aan':''), tot ? st.goed+' van '+tot+' goed ('+pct+'%)' : 'nog geen vragen gemaakt'));
+      if(medaille) stat.appendChild(el('span','pil medaille',medaille));
+      if(nu){
+        var dvandaag=dagState(), taken=dagTaken(huidigeDag());
+        var af=taken.filter(function(x){ return dvandaag.taken[x.k]; }).length;
+        stat.appendChild(el('span','pil nu','Module van vandaag · '+af+' van '+taken.length+' taken'));
+      }
+      p.appendChild(stat);
+
+      var row=el('div'); row.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+      var b1=el('button','btn sec'+(gelezen?' gedaan':''), (gelezen?'✓ ':'')+'Lesstof ('+m.lessons.length+')');
+      b1.onclick=function(){startLes(m)};
+      var b2=el('button','btn','Quiz ('+m.questions.length+')'); b2.onclick=function(){startQuiz(schud(m.questions),'Quiz · '+m.titel)};
+      row.appendChild(b1); row.appendChild(b2);
+      if(m.puzzles.length){ var b3=el('button','btn sec','Puzzels ('+m.puzzles.length+')'); b3.onclick=function(){startPuzzels(m)}; row.appendChild(b3); }
+      p.appendChild(row);
+      wrap.appendChild(p);
+    }
+    lijst.appendChild(wrap);
   });
-  v.appendChild(h);
+  h.appendChild(lijst);
 }
 function startLes(m){
   var i=0;
@@ -1174,6 +1425,15 @@ function startLes(m){
     var c=el('div','card stack');
     c.appendChild(el('div','eyebrow',m.titel));
     c.appendChild(el('h3',null,L.t));
+    /* Een tekening alleen waar hij de uitleg echt sterker maakt. Het veld `ill`
+       staat expliciet in de content; geen trefwoordherkenning, want dat gaat op
+       termijn altijd mis. Lessen over één specifiek bord krijgen niets: daar
+       doet de bordChip uit elB() het werk al. */
+    if(L.ill && window.ILLUSTRATIES && window.ILLUSTRATIES[L.ill]){
+      var fig=el('div','lesill');
+      fig.innerHTML=window.ILLUSTRATIES[L.ill]();
+      c.appendChild(fig);
+    }
     c.appendChild(elB('div',null,L.b));
     c.appendChild(el('div','art',L.a));
     h.appendChild(c);
@@ -1291,9 +1551,11 @@ function startPuzzels(m){
 }
 
 /* ---------- BORDEN ---------- */
-function vBorden(v){
+/* `ingebed` is waar als dit het Borden-segment binnen Leren is; dan staat de
+   kop er al. */
+function vBorden(v, ingebed){
   var h=el('div','stack');
-  h.appendChild(el('h2',null,'Borden'));
+  if(!ingebed) h.appendChild(el('h2',null,'Borden'));
   var bakken=[0,0,0,0,0,0];
   SIGNS.forEach(function(s){ bakken[bakVan(s.c)]++; });
   var c=el('div','card stack');
@@ -1367,14 +1629,14 @@ function startFlash(){
         cc.appendChild(el('div','score tnum',goed+'/'+stapel.length));
         cc.appendChild(el('div','muted','Borden die je niet wist komen morgen weer terug.'));
         e.appendChild(cc);
-        var ab2=el('button','btn wide','Terug'); ab2.onclick=function(){TAB='borden';teken()}; e.appendChild(ab2);
+        var ab2=el('button','btn wide','Terug'); ab2.onclick=function(){naarBorden();teken()}; e.appendChild(ab2);
         v2.appendChild(e); if(goed===stapel.length) vier('klein'); voltooiTaak('borden');
       }
     }
     ok.onclick=function(){verder(true)}; fout.onclick=function(){verder(false)};
     c.appendChild(draai); c.appendChild(keuzes);
     h.appendChild(c);
-    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){TAB='borden';teken()}; h.appendChild(ab);
+    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){naarBorden();teken()}; h.appendChild(ab);
     v.appendChild(h); $('#main').scrollTop=0;
   }
   toon();
@@ -1412,14 +1674,14 @@ function startBordQuiz(){
         fb.appendChild(elB('div','small',Q.s.b));
         c.appendChild(fb);
         var nb=el('button','btn wide', i===vragen.length-1?'Klaar':'Volgende');
-        nb.onclick=function(){ i++; if(i<vragen.length) toon(); else { if(goed===vragen.length) vier('klein'); toast('Bordenquiz: '+goed+'/'+vragen.length); voltooiTaak('borden'); TAB='borden'; teken(); } };
+        nb.onclick=function(){ i++; if(i<vragen.length) toon(); else { if(goed===vragen.length) vier('klein'); toast('Bordenquiz: '+goed+'/'+vragen.length); voltooiTaak('borden'); naarBorden(); teken(); } };
         c.appendChild(nb); nb.focus();
       };
       grid.appendChild(t);
     });
     c.appendChild(grid);
     h.appendChild(c);
-    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){TAB='borden';teken()}; h.appendChild(ab);
+    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){naarBorden();teken()}; h.appendChild(ab);
     v.appendChild(h); $('#main').scrollTop=0;
   }
   toon();
@@ -1620,6 +1882,81 @@ function eindExamen(){
 }
 
 /* ---------- BATTLE PASS ---------- */
+/* ---------- COLLECTIE ---------- */
+/* Raster van 151 vakjes. Wat je verdiend hebt toont de sprite, de rest een
+   silhouet — zo zie je meteen wat er nog te halen valt. */
+function vCollectie(v){
+  var h=el('div','stack');
+  h.appendChild(el('h2',null,'Collectie'));
+
+  var perNr={};
+  S.beloningen.forEach(function(b){ perNr[b.p]=b; });
+  var aantal=S.beloningen.length;
+  var shinies=S.beloningen.filter(function(b){ return b.s; }).length;
+
+  var k=el('div','card stack');
+  k.appendChild(el('div','eyebrow','Eén per afgeronde dag'));
+  k.appendChild(el('div','small muted','Elke dag van het veertiendaagse programma die je afrondt levert er één op. Een foutloze dag geeft altijd een shiny.'));
+  var cij=el('div','cijfers');
+  [[aantal+' / 14','gevangen'],[shinies,'shiny'],[Object.keys(perNr).length+' / 151','verschillend']].forEach(function(p){
+    var c=el('div','cijfer');
+    c.appendChild(el('div','cv',String(p[0])));
+    c.appendChild(el('div','cl',p[1]));
+    cij.appendChild(c);
+  });
+  k.appendChild(cij);
+  /* Welke mijlpaal er aankomt, want daar zitten de legendaries en starters. */
+  var volgendeMijl=null;
+  for(var dg=1;dg<=14;dg++) if(!S.dagenGedaan[dg] && mijlpaalDag(dg)){ volgendeMijl=dg; break; }
+  k.appendChild(el('div','small muted', volgendeMijl
+    ? 'Dag '+volgendeMijl+' is een mijlpaaldag: dan trek je uit de zeldzame pool (legendaries en starters).'
+    : 'Alle mijlpaaldagen zijn gehaald.'));
+  h.appendChild(k);
+
+  var detail=el('div','card stack pokedetail');
+  detail.hidden=true;
+  h.appendChild(detail);
+
+  var g=el('div','card'); g.style.padding='10px';
+  var grid=el('div','grid g-poke');
+  for(var i=1;i<=151;i++) grid.appendChild(pokeVak(i, perNr[i], detail));
+  g.appendChild(grid);
+  h.appendChild(g);
+  v.appendChild(h);
+}
+function pokeVak(id, bel, detail){
+  var t=el('button','pokevak'+(bel?' heb':'')+(bel&&bel.s?' shiny':'')); t.type='button';
+  var im=document.createElement('img');
+  im.src=spriteBron(id, bel && bel.s);
+  im.alt = bel ? pokeNaam(id) : 'Nog niet gevangen';
+  im.loading='lazy'; im.width=56; im.height=56;
+  /* Sprites kunnen op de publieke versie van PokeAPI komen; valt dat weg, dan
+     blijft het vakje leeg in plaats van een gebroken plaatje te tonen. */
+  im.onerror=function(){ im.style.visibility='hidden'; };
+  t.appendChild(im);
+  t.appendChild(el('span','pokenr','#'+id));
+  if(!bel){ t.setAttribute('aria-label','Nummer '+id+', nog niet gevangen'); return t; }
+  t.setAttribute('aria-label', pokeNaam(id)+(bel.s?', shiny':'')+', dag '+bel.d);
+  t.onclick=function(){
+    speelCry(id);                      // meteen bij de klik: iOS eist dat
+    detail.hidden=false;
+    detail.innerHTML='';
+    var kop=el('div','pokekop');
+    var gr=document.createElement('img');
+    gr.src=spriteBron(id, bel.s); gr.alt=''; gr.width=84; gr.height=84; gr.className='pokegroot';
+    gr.onerror=function(){ gr.style.visibility='hidden'; };
+    kop.appendChild(gr);
+    var box=el('div'); box.style.minWidth='0';
+    box.appendChild(el('div','eyebrow','#'+id+(bel.s?' · shiny':'')));
+    box.appendChild(el('h3',null,pokeNaam(id)));
+    box.appendChild(el('div','small muted','Dag '+bel.d+(bel.t?' · '+bel.t:'')+(mijlpaalDag(bel.d)?' · mijlpaaldag':'')));
+    kop.appendChild(box);
+    detail.appendChild(kop);
+    detail.scrollIntoView({block:'nearest'});
+  };
+  return t;
+}
+
 function vPass(v){
   var t=passTier();
   var h=el('div','stack');

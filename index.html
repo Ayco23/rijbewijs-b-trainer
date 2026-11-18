@@ -196,6 +196,53 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:5px
 .pilv{width:13px;height:13px;flex:0 0 auto}
 .btn.sec.gedaan{border-color:var(--goed);color:var(--goed)}
 
+/* ---- Leren: segmentknop en accordeon ---- */
+.seg{display:flex;gap:4px;padding:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:11px}
+.segknop{flex:1;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:var(--fg-2);
+  font:600 13.5px var(--f-body);cursor:pointer}
+.segknop.aan{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+/* Acht rijen van ~56px: samen passen ze op één telefoonscherm, zodat je in
+   één blik ziet hoe ver je met elke module bent. */
+.leerlijst{padding:0;overflow:hidden}
+.leerblok{border-bottom:1px solid var(--line)}
+.leerblok:last-child{border-bottom:0}
+.leerblok.nu{background:var(--blauw-zacht)}
+.leerrij{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:8px 12px;
+  background:transparent;border:0;border-left:3px solid transparent;cursor:pointer;text-align:left;color:var(--fg)}
+.leerblok.nu>.leerrij{border-left-color:var(--c)}
+.leerico{flex:0 0 auto;width:26px;line-height:0}
+.leermid{flex:1;min-width:0;display:block}
+.leertitel{display:block;font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.leerbar{display:block;height:5px;margin-top:5px}
+.leerbar i{display:block;height:100%;border-radius:99px;transition:width .3s}
+.leerpct{flex:0 0 auto;font-family:var(--f-disp);font-size:12px;font-weight:700;color:var(--fg-2);min-width:34px;text-align:right}
+.leermed{flex:0 0 auto;font-size:10.5px;color:var(--fg-3);min-width:46px;text-align:right;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.leerchev{flex:0 0 auto;color:var(--fg-3);line-height:0;transition:transform .2s}
+.leerblok.open .leerchev{transform:rotate(90deg)}
+.leerpaneel{padding:0 12px 14px;border-left:3px solid var(--c)}
+@media(max-width:380px){.leermed{display:none}}
+
+/* ---- tekening bij een leskaart ---- */
+.lesill{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:8px;line-height:0}
+.lesill svg{display:block;width:100%;height:auto}
+
+/* ---- collectie ---- */
+.g-poke{grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:6px}
+.pokevak{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);
+  display:grid;place-items:center;padding:2px;cursor:default}
+.pokevak img{width:100%;height:auto;max-height:100%;image-rendering:pixelated;display:block}
+/* Nog niet gevangen: een silhouet, zodat je wel ziet wat er te halen valt. */
+.pokevak:not(.heb) img{filter:brightness(0) opacity(.22)}
+:root[data-theme="dark"] .pokevak:not(.heb) img{filter:brightness(0) invert(1) opacity(.2)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .pokevak:not(.heb) img{filter:brightness(0) invert(1) opacity(.2)}}
+.pokevak.heb{cursor:pointer;background:var(--surface);border-color:var(--line)}
+.pokevak.shiny{border-color:var(--geel);box-shadow:inset 0 0 0 1px var(--geel)}
+.pokenr{position:absolute;left:4px;bottom:2px;font-family:var(--f-disp);font-size:9px;color:var(--fg-3);line-height:1}
+.pokedetail{border-left:4px solid var(--geel)}
+.pokekop{display:flex;gap:12px;align-items:center}
+.pokegroot{flex:0 0 auto;image-rendering:pixelated}
+
 /* ---- vandaag: cijfers en dagstrip ---- */
 .cijfers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:2px}
 .cijfer{background:var(--surface-2);border-radius:10px;padding:9px 8px;text-align:center;min-width:0}
@@ -266,14 +313,14 @@ window.MODULES = [
   id: 'voorrang', nr: 2, titel: 'Voorrang', kleur: '--m-voorrang',
   samenvatting: 'Wie mag er eerst? Van rechts, haaientanden, afslaan, bijzondere manoeuvres en voorrangsvoertuigen.',
   lessons: [
-    {t:'Voorrang verlenen is iets anders dan voor laten gaan', b:'Voorrang verlenen doe je tegenover bestuurders: je stelt ze in staat ongehinderd door te rijden. Voor laten gaan doe je tegenover alle weggebruikers, dus ook voetgangers. Op het examen wordt dit verschil getoetst.', a:'RVV 1990, art. 1'},
+    {t:'Voorrang verlenen is iets anders dan voor laten gaan', b:'Voorrang verlenen doe je tegenover bestuurders: je stelt ze in staat ongehinderd door te rijden. Voor laten gaan doe je tegenover alle weggebruikers, dus ook voetgangers. Op het examen wordt dit verschil getoetst.', a:'RVV 1990, art. 1', ill:'zebra'},
     {t:'Hoofdregel: verkeer van rechts gaat voor', b:'Op een kruispunt laat je bestuurders die van rechts komen voorgaan. Dat geldt voor alle bestuurders: auto, motor, fiets, bromfiets, ook als ze langzaam zijn.', a:'RVV 1990, art. 15 lid 1'},
     {t:'Twee uitzonderingen op verkeer van rechts', b:'1. Kom je van een onverharde weg, dan verleen je voorrang aan bestuurders op de verharde weg. 2. Een tram gaat altijd voor, ook als die van links komt.', a:'RVV 1990, art. 15 lid 2'},
     {t:'Borden en tekens gaan boven de hoofdregel', b:'Haaientanden met bord B6, een stopstreep met B7, een voorrangsweg B1 of verkeerslichten bepalen de voorrang. Pas als die er niet zijn, geldt verkeer van rechts. Een verkeersregelaar gaat boven alles.', a:'RVV 1990, art. 82 en 84'},
     {t:'Haaientanden: de punten wijzen naar jou', b:'Wijzen de punten van de haaientanden naar jou toe, dan moet jij voorrang verlenen. Stoppen hoeft niet als de kruisende weg vrij is. Bij bord B7 moet je altijd stilstaan.', a:'RVV 1990, art. 80'},
     {t:'Afslaan: rechtdoor gaat voor', b:'Sla je af, dan laat je het rechtdoorgaande verkeer op dezelfde weg voorgaan. Dat is dus ook de fietser rechts naast je als jij rechtsaf gaat, en de tegenligger als jij linksaf gaat.', a:'RVV 1990, art. 18 lid 1'},
     {t:'Bijzondere manoeuvre: jij laat iedereen voorgaan', b:'Wegrijden, achteruitrijden, keren, een uitrit of erf uitrijden, van rijstrook wisselen, invoegen en uitvoegen zijn bijzondere manoeuvres. Je laat dan al het overige verkeer voorgaan, dus ook een fietser of voetganger.', a:'RVV 1990, art. 54'},
-    {t:'Rotonde', b:'Haaientanden bij de oprit betekenen dat verkeer op de rotonde voorgaat. Verlaat je de rotonde, dan sla je af en laat je fietsers en voetgangers op het fietspad of zebrapad voorgaan. Zonder borden geldt gewoon verkeer van rechts.', a:'RVV 1990, art. 15 en 18'},
+    {t:'Rotonde', b:'Haaientanden bij de oprit betekenen dat verkeer op de rotonde voorgaat. Verlaat je de rotonde, dan sla je af en laat je fietsers en voetgangers op het fietspad of zebrapad voorgaan. Zonder borden geldt gewoon verkeer van rechts.', a:'RVV 1990, art. 15 en 18', ill:'rotonde'},
     {t:'Voorrangsvoertuig', b:'Een voertuig met blauw zwaailicht en tweetonige hoorn samen is een voorrangsvoertuig. Je laat het voorgaan, ook als jij groen hebt. Alleen zwaailicht zonder sirene geeft geen voorrang.', a:'RVV 1990, art. 50'},
     {t:'Lijnbus binnen de bebouwde kom', b:'Rijdt een lijnbus binnen de bebouwde kom weg vanaf een halte en geeft hij richting aan, dan laat jij hem voorgaan. Buiten de bebouwde kom hoeft dat niet.', a:'RVV 1990, art. 56'},
     {t:'Blokkeer het kruispunt niet', b:'Je mag een kruispunt alleen oprijden als je er ook voorbij kunt komen. Sta je stil op het kruispunt, dan blokkeer je de kruisende richting.', a:'RVV 1990, art. 14'},
@@ -337,7 +384,7 @@ window.MODULES = [
     {t:'Bijzondere lichten', b:'Rood knipperend bij een spoorwegovergang: stoppen. Geel knipperend: gevaarlijk punt, voorzichtigheid geboden. Een wit licht bij een tram of lijnbus is een richtinglicht voor die bestuurder, niet voor jou. Een rood kruis boven je rijstrook betekent dat die gesloten is.', a:'RVV 1990, art. 70, 71, 73 en 75'},
     {t:'Strepen op de weg', b:'Een doorgetrokken streep mag je niet overschrijden en niet eroverheen rijden. Bij een onderbroken streep naast een doorgetrokken streep geldt de streep die het dichtst bij jou ligt. Een blokmarkering (brede onderbroken streep) scheidt rijstroken en mag je wel overschrijden.', a:'RVV 1990, art. 76'},
     {t:'Haaientanden en stopstreep', b:'Haaientanden: voorrang verlenen, stoppen hoeft niet. Stopstreep bij bord B7 of bij rood licht: altijd voor de streep stilstaan. Een stopstreep zonder bord hoort bij de verkeerslichten.', a:'RVV 1990, art. 80 en 68'},
-    {t:'Zebrapad en fietsstrook', b:'Een zebrapad bestaat uit witte banen over de weg: voetgangers voor laten gaan. Een fietsstrook is een strook op de rijbaan met fietssymbolen; je mag er met een motorvoertuig niet op rijden, ook niet om te parkeren.', a:'RVV 1990, art. 10 en 49'},
+    {t:'Zebrapad en fietsstrook', b:'Een zebrapad bestaat uit witte banen over de weg: voetgangers voor laten gaan. Een fietsstrook is een strook op de rijbaan met fietssymbolen; je mag er met een motorvoertuig niet op rijden, ook niet om te parkeren.', a:'RVV 1990, art. 10 en 49', ill:'zebra'},
     {t:'Veel verwarde borden', b:'C2 (wit balkje in rode cirkel) is inrijden verboden; C3 (witte pijl in blauwe cirkel) is eenrichtingsweg waar je juist wel mag rijden. E1 is parkeerverbod, E2 is stilstaan verboden. G11 is verplicht fietspad, G13 is onverplicht fietspad.', a:'RVV 1990, bijlage 1'}
   ],
   questions: [
@@ -393,14 +440,14 @@ window.MODULES2 = [
     {t:'Rechts houden', b:'Je houdt zoveel mogelijk rechts. Op een weg met rijstroken binnen de bebouwde kom mag je vrij een rijstrook kiezen; buiten de bebouwde kom gebruik je de rechterstrook en de linker alleen om in te halen.', a:'RVV 1990, art. 3'},
     {t:'Waar rijd je met welk voertuig', b:'Motorvoertuigen horen op de rijbaan. Fietsers en bromfietsers gebruiken het fietspad of fiets/bromfietspad als dat er is. Voetgangers lopen op het trottoir of, als dat ontbreekt, zoveel mogelijk links langs de weg.', a:'RVV 1990, art. 3, 4 en 10'},
     {t:'Maximumsnelheden voor een personenauto', b:'Bebouwde kom 50. Buiten de bebouwde kom 80. Autoweg 100. Autosnelweg 100 tussen 06.00 en 19.00 uur, daarbuiten wat op de borden staat. Erf 15. Borden gaan altijd voor deze standaardwaarden.', a:'RVV 1990, art. 20, 21 en 45'},
-    {t:'Met een aanhanger of caravan', b:'Met een aanhangwagen rijd je op de autosnelweg en autoweg maximaal 90 km/h en op andere wegen buiten de bebouwde kom maximaal 80 km/h.', a:'RVV 1990, art. 22'},
+    {t:'Met een aanhanger of caravan', b:'Met een aanhangwagen rijd je op de autosnelweg en autoweg maximaal 90 km/h en op andere wegen buiten de bebouwde kom maximaal 80 km/h.', a:'RVV 1990, art. 22', ill:'aanhanger'},
     {t:'Inhalen doe je links', b:'Je haalt links in. Rechts inhalen mag als de voorligger duidelijk heeft aangegeven linksaf te slaan, en op rijstroken waar het verkeer in rijen rijdt en jouw rij sneller gaat.', a:'RVV 1990, art. 11'},
     {t:'Waar je niet mag inhalen', b:'Niet vlak voor of op een zebrapad, niet vlak voor of op een spoorwegovergang, en niet waar bord F1 of F3 staat of een doorgetrokken streep ligt.', a:'RVV 1990, art. 11, 12 en 76'},
-    {t:'Afstand houden', b:'Hou zoveel afstand dat je kunt stoppen als de voorligger plotseling remt. De vuistregel is twee seconden; bij regen, mist of een zware auto maak je er drie van.', a:'RVV 1990, art. 19'},
+    {t:'Afstand houden', b:'Hou zoveel afstand dat je kunt stoppen als de voorligger plotseling remt. De vuistregel is twee seconden; bij regen, mist of een zware auto maak je er drie van.', a:'RVV 1990, art. 19', ill:'tweeseconden'},
     {t:'Stilstaan mag niet overal', b:'Niet op een kruispunt, op een overweg, op een zebrapad of binnen vijf meter ervoor, langs een gele doorgetrokken streep, in een tunnel of op de rijbaan van een autosnelweg of autoweg.', a:'RVV 1990, art. 23'},
     {t:'Parkeren mag nog minder vaak', b:'Niet bij een kruispunt binnen vijf meter, niet voor een inrit of uitrit, niet langs een gele onderbroken streep, niet op een gehandicaptenplaats zonder kaart en niet zo dat je anderen hindert.', a:'RVV 1990, art. 24'},
-    {t:'Verlichting', b:'Bij duisternis en bij slecht zicht voer je dimlicht. Mistlicht achter mag alleen als het zicht minder is dan 50 meter. Overdag is dagrijverlichting verplicht op auto’s die er vanaf fabriek mee zijn uitgerust.', a:'RVV 1990, art. 32 t/m 36'},
-    {t:'Gordels en kinderen', b:'Iedereen in de auto draagt een gordel. Kinderen kleiner dan 1,35 meter zitten in een goedgekeurd kinderzitje. Jij als bestuurder bent verantwoordelijk voor passagiers onder de 18.', a:'RVV 1990, art. 59 en 60'},
+    {t:'Verlichting', b:'Bij duisternis en bij slecht zicht voer je dimlicht. Mistlicht achter mag alleen als het zicht minder is dan 50 meter. Overdag is dagrijverlichting verplicht op auto’s die er vanaf fabriek mee zijn uitgerust.', a:'RVV 1990, art. 32 t/m 36', ill:'mist'},
+    {t:'Gordels en kinderen', b:'Iedereen in de auto draagt een gordel. Kinderen kleiner dan 1,35 meter zitten in een goedgekeurd kinderzitje. Jij als bestuurder bent verantwoordelijk voor passagiers onder de 18.', a:'RVV 1990, art. 59 en 60', ill:'gordel'},
     {t:'Telefoon vasthouden mag niet', b:'Je mag tijdens het rijden geen mobiel elektronisch apparaat vasthouden. Handsfree bellen mag, maar ook dat kost aandacht.', a:'RVV 1990, art. 61a'}
   ],
   questions:[
@@ -439,15 +486,15 @@ window.MODULES2 = [
   id:'bijzonder', nr:3, titel:'Bijzondere wegen en manoeuvres', kleur:'--m-bijzonder',
   samenvatting:'Autosnelweg, erf, rotonde, tunnel, spoorwegovergang, in- en uitvoegen, keren en achteruitrijden.',
   lessons:[
-    {t:'Wie mag op de autosnelweg', b:'Alleen motorvoertuigen die minimaal 60 km/h kunnen én mogen rijden. Op de autoweg is dat 50 km/h. Fietsers, bromfietsers, landbouwvoertuigen en voetgangers mogen er niet komen.', a:'RVV 1990, art. 42 en bijlage 1 borden G1 en G3'},
+    {t:'Wie mag op de autosnelweg', b:'Alleen motorvoertuigen die minimaal 60 km/h kunnen én mogen rijden. Op de autoweg is dat 50 km/h. Fietsers, bromfietsers, landbouwvoertuigen en voetgangers mogen er niet komen.', a:'RVV 1990, art. 42 en bijlage 1 borden G1 en G3', ill:'snelweg'},
     {t:'Keren en achteruitrijden op de snelweg', b:'Op een autosnelweg en autoweg mag je niet keren en niet achteruitrijden. Mis je je afrit, dan rijd je door tot de volgende.', a:'RVV 1990, art. 43'},
-    {t:'Invoegen en uitvoegen', b:'Invoegen is een bijzondere manoeuvre: je past je snelheid aan die van de doorgaande rijbaan aan en laat dat verkeer voorgaan. Uitvoegen doe je tijdig, op de uitvoegstrook, niet door hard te remmen op de rijbaan.', a:'RVV 1990, art. 54'},
+    {t:'Invoegen en uitvoegen', b:'Invoegen is een bijzondere manoeuvre: je past je snelheid aan die van de doorgaande rijbaan aan en laat dat verkeer voorgaan. Uitvoegen doe je tijdig, op de uitvoegstrook, niet door hard te remmen op de rijbaan.', a:'RVV 1990, art. 54', ill:'snelweg'},
     {t:'Vluchtstrook en spitsstrook', b:'De vluchtstrook is alleen voor noodgevallen. Een spitsstrook is een vluchtstrook die als rijstrook is opengesteld; dat zie je aan een groene pijl boven de strook. Staat er een rood kruis, dan mag je er niet rijden.', a:'RVV 1990, art. 1, 43 en 70'},
-    {t:'Pech op de snelweg', b:'Rijd zo ver mogelijk naar rechts, zet je alarmlichten aan, stap rechts uit, ga achter de vangrail staan en bel het alarmnummer of de wegenwacht. Een gevarendriehoek plaats je niet op de snelweg; op andere wegen wel, zo’n 30 meter voor de auto.', a:'RVV 1990, art. 43 en 58'},
-    {t:'Erf', b:'Op een erf mag je niet sneller dan 15 km per uur rijden. Voetgangers mogen de hele breedte gebruiken en spelen is toegestaan. Parkeren mag alleen in de vakken. Een erf verlaten is een bijzondere manoeuvre.', a:'RVV 1990, art. 44, 45, 46 en 54'},
-    {t:'Rotonde', b:'Volg de rotonde rechtsom (bord D1). Haaientanden bij de oprit betekenen voorrang verlenen aan het verkeer op de rotonde. Bij het verlaten geef je rechts richting aan en laat je rechtdoorgaande fietsers en voetgangers voorgaan.', a:'RVV 1990, art. 18 en bijlage 1 bord D1'},
-    {t:'Tunnel', b:'Doe je dimlicht aan, hou afstand en stem je radio af op de tunnelzender. Bij file in een tunnel: motor uit, alarmlichten aan. Bij brand verlaat je de auto met de sleutel erin en loop je naar de dichtstbijzijnde nooduitgang.', a:'RVV 1990, art. 32 en bijlage 1 bord L13'},
-    {t:'Spoorwegovergang', b:'De trein gaat altijd voor. Rijd pas op als je er zeker helemaal voorbij kunt komen. Rode knipperlichten betekenen stoppen, ook als de bomen nog openstaan. Blijf je toch staan op het spoor: rijd door de bomen heen, die breken af.', a:'RVV 1990, art. 14 en 71'},
+    {t:'Pech op de snelweg', b:'Rijd zo ver mogelijk naar rechts, zet je alarmlichten aan, stap rechts uit, ga achter de vangrail staan en bel het alarmnummer of de wegenwacht. Een gevarendriehoek plaats je niet op de snelweg; op andere wegen wel, zo’n 30 meter voor de auto.', a:'RVV 1990, art. 43 en 58', ill:'pech'},
+    {t:'Erf', b:'Op een erf mag je niet sneller dan 15 km per uur rijden. Voetgangers mogen de hele breedte gebruiken en spelen is toegestaan. Parkeren mag alleen in de vakken. Een erf verlaten is een bijzondere manoeuvre.', a:'RVV 1990, art. 44, 45, 46 en 54', ill:'erf'},
+    {t:'Rotonde', b:'Volg de rotonde rechtsom (bord D1). Haaientanden bij de oprit betekenen voorrang verlenen aan het verkeer op de rotonde. Bij het verlaten geef je rechts richting aan en laat je rechtdoorgaande fietsers en voetgangers voorgaan.', a:'RVV 1990, art. 18 en bijlage 1 bord D1', ill:'rotonde'},
+    {t:'Tunnel', b:'Doe je dimlicht aan, hou afstand en stem je radio af op de tunnelzender. Bij file in een tunnel: motor uit, alarmlichten aan. Bij brand verlaat je de auto met de sleutel erin en loop je naar de dichtstbijzijnde nooduitgang.', a:'RVV 1990, art. 32 en bijlage 1 bord L13', ill:'tunnel'},
+    {t:'Spoorwegovergang', b:'De trein gaat altijd voor. Rijd pas op als je er zeker helemaal voorbij kunt komen. Rode knipperlichten betekenen stoppen, ook als de bomen nog openstaan. Blijf je toch staan op het spoor: rijd door de bomen heen, die breken af.', a:'RVV 1990, art. 14 en 71', ill:'spoorweg'},
     {t:'Bijzondere manoeuvres op een rij', b:'Wegrijden, achteruitrijden, keren, een inrit of uitrit in- of uitrijden, van rijstrook wisselen, invoegen, uitvoegen en een erf verlaten. Bij al deze manoeuvres laat je het overige verkeer voorgaan.', a:'RVV 1990, art. 54'},
     {t:'Inhalen van langzaam verkeer', b:'Een fiets of bromfiets haal je in met als vuistregel minstens anderhalve meter zijdelingse afstand. Bij bord F1 mag je motorvoertuigen niet inhalen, maar een fiets wel.', a:'RVV 1990, art. 11 en bijlage 1 bord F1'},
     {t:'Busbaan en busstrook', b:'Bij bord F13 mag je als automobilist niet op de baan of strook rijden. Een busstrook met het woord BUS op het wegdek en een doorgetrokken streep mag je ook niet gebruiken.', a:'RVV 1990, art. 81 en 76'}
@@ -490,18 +537,18 @@ window.MODULES2 = [
   id:'veilig', nr:4, titel:'Veilig rijden en noodsituaties', kleur:'--m-veilig',
   samenvatting:'Stopafstand, remmen, slippen, zicht, vermoeidheid en wat je doet bij een ongeval.',
   lessons:[
-    {t:'Stopafstand = reactieafstand + remweg', b:'De reactieafstand is wat je aflegt voordat je remt, ongeveer een seconde. De remweg is wat je daarna nog aflegt. Samen is dat je stopafstand.', a:'RVV 1990, art. 19'},
-    {t:'Twee keer zo hard is vier keer zo lange remweg', b:'De remweg neemt toe met het kwadraat van de snelheid. Van 50 naar 100 km/h is de remweg dus ongeveer vier keer zo lang, niet twee keer.', a:'RVV 1990, art. 19'},
-    {t:'Op een natte weg', b:'Bij regen is de remweg ongeveer anderhalf tot twee keer zo lang. Bij ijzel kan dat oplopen tot tien keer. Hou daarom drie seconden afstand in plaats van twee.', a:'RVV 1990, art. 19'},
-    {t:'Aquaplaning', b:'Bij een laag profiel en veel water kan er een laagje water tussen band en wegdek komen. Je verliest dan grip. Niet sturen of remmen: gas los en de auto maakt vanzelf weer contact.', a:'Rijtechniek'},
-    {t:'Slippen', b:'Onderstuur betekent dat de voorkant rechtdoor schuift: gas los en stuur minder in. Overstuur betekent dat de achterkant uitbreekt: stuur rustig tegen, in de richting waar je heen wilt.', a:'Rijtechniek'},
-    {t:'ABS gebruiken', b:'Met ABS blokkeren de wielen niet, zodat je kunt blijven sturen tijdens een noodstop. Trap het rempedaal stevig in en hou het ingetrapt; het trillen van het pedaal is normaal.', a:'Regeling voertuigen'},
-    {t:'Dode hoek', b:'Rechts naast en schuin achter je zit een gebied dat je in je spiegels niet ziet. Kijk daarom altijd over je schouder voordat je van rijstrook wisselt of rechtsaf slaat. Bij een vrachtwagen is de dode hoek veel groter.', a:'WVW 1994, art. 5 en RVV 1990, art. 54'},
+    {t:'Stopafstand = reactieafstand + remweg', b:'De reactieafstand is wat je aflegt voordat je remt, ongeveer een seconde. De remweg is wat je daarna nog aflegt. Samen is dat je stopafstand.', a:'RVV 1990, art. 19', ill:'stopafstand'},
+    {t:'Twee keer zo hard is vier keer zo lange remweg', b:'De remweg neemt toe met het kwadraat van de snelheid. Van 50 naar 100 km/h is de remweg dus ongeveer vier keer zo lang, niet twee keer.', a:'RVV 1990, art. 19', ill:'stopafstand'},
+    {t:'Op een natte weg', b:'Bij regen is de remweg ongeveer anderhalf tot twee keer zo lang. Bij ijzel kan dat oplopen tot tien keer. Hou daarom drie seconden afstand in plaats van twee.', a:'RVV 1990, art. 19', ill:'tweeseconden'},
+    {t:'Aquaplaning', b:'Bij een laag profiel en veel water kan er een laagje water tussen band en wegdek komen. Je verliest dan grip. Niet sturen of remmen: gas los en de auto maakt vanzelf weer contact.', a:'Rijtechniek', ill:'bandprofiel'},
+    {t:'Slippen', b:'Onderstuur betekent dat de voorkant rechtdoor schuift: gas los en stuur minder in. Overstuur betekent dat de achterkant uitbreekt: stuur rustig tegen, in de richting waar je heen wilt.', a:'Rijtechniek', ill:'slippen'},
+    {t:'ABS gebruiken', b:'Met ABS blokkeren de wielen niet, zodat je kunt blijven sturen tijdens een noodstop. Trap het rempedaal stevig in en hou het ingetrapt; het trillen van het pedaal is normaal.', a:'Regeling voertuigen', ill:'slippen'},
+    {t:'Dode hoek', b:'Rechts naast en schuin achter je zit een gebied dat je in je spiegels niet ziet. Kijk daarom altijd over je schouder voordat je van rijstrook wisselt of rechtsaf slaat. Bij een vrachtwagen is de dode hoek veel groter.', a:'WVW 1994, art. 5 en RVV 1990, art. 54', ill:'dodehoek'},
     {t:'Vermoeidheid', b:'Vermoeid rijden lijkt in reactietijd op rijden onder invloed. Stop elke twee uur, loop even, en neem bij slaperigheid een korte pauze. Koffie of raam open helpt maar kort.', a:'WVW 1994, art. 5'},
-    {t:'Bij een ongeval', b:'Zet je auto veilig neer, alarmlichten aan, hesje aan. Bel 112 bij gewonden. Je mag nooit doorrijden na een ongeval; dat is een misdrijf. Wissel gegevens uit en vul een schadeformulier in.', a:'WVW 1994, art. 7'},
+    {t:'Bij een ongeval', b:'Zet je auto veilig neer, alarmlichten aan, hesje aan. Bel 112 bij gewonden. Je mag nooit doorrijden na een ongeval; dat is een misdrijf. Wissel gegevens uit en vul een schadeformulier in.', a:'WVW 1994, art. 7', ill:'pech'},
     {t:'Hulp verlenen', b:'Zorg eerst voor je eigen veiligheid, dan die van anderen. Haal een gewonde alleen uit de auto bij acuut gevaar, zoals brand. Een helm van een motorrijder laat je af, tenzij de ademhaling in gevaar is.', a:'WVW 1994, art. 7'},
     {t:'Gevaar op de weg', b:'Je mag geen gevaar veroorzaken of het verkeer hinderen. Dat is een ruime regel waaronder ook te dicht op de voorligger rijden en onnodig links rijden vallen.', a:'WVW 1994, art. 5'},
-    {t:'Rijden onder invloed', b:'De grens is 0,5 promille, voor een beginnend bestuurder 0,2 promille. Ook medicijnen met een gele sticker en drugs vallen hieronder. Alcohol vertraagt je reactie en maakt je overmoedig.', a:'WVW 1994, art. 8'}
+    {t:'Rijden onder invloed', b:'De grens is 0,5 promille, voor een beginnend bestuurder 0,2 promille. Ook medicijnen met een gele sticker en drugs vallen hieronder. Alcohol vertraagt je reactie en maakt je overmoedig.', a:'WVW 1994, art. 8', ill:'alcohol'}
   ],
   questions:[
     {t:'mc', v:'Waaruit bestaat de stopafstand?', o:['Alleen de remweg','Reactieafstand plus remweg','Remweg plus veiligheidsmarge','Reactietijd plus snelheid'], a:1, u:'De stopafstand is de reactieafstand (voor je remt) plus de remweg (terwijl je remt).', art:'Rijtechnisch gegeven'},
@@ -544,8 +591,8 @@ window.MODULES2 = [
     {t:'Gewicht en luchtweerstand', b:'Een dakkoffer of fietsendrager kost al snel tien tot twintig procent extra brandstof. Haal hem eraf als je hem niet gebruikt en laat geen onnodige spullen in de auto liggen.', a:'Het Nieuwe Rijden'},
     {t:'Airco en elektrische verbruikers', b:'Airco, stoelverwarming en achterruitverwarming kosten brandstof. Gebruik ze als het nodig is en zet ze daarna weer uit.', a:'Het Nieuwe Rijden'},
     {t:'Milieuzone', b:'In een milieuzone mogen vervuilende voertuigen niet komen; dat is bord C22a. Een nul-emissiezone heeft bord C22c en geldt voor bedrijfs- en vrachtauto\u2019s. Het onderbord zegt steeds welke voertuigen geweerd worden.', a:'RVV 1990, art. 86d en 86e'},
-    {t:'Alcohol', b:'De grens is 0,5 promille, voor een beginnend bestuurder 0,2 promille. Alcohol wordt maar langzaam afgebroken, ongeveer één standaardglas per uur. Koffie, douchen of eten versnelt dat niet.', a:'WVW 1994, art. 8'},
-    {t:'Drugs en medicijnen', b:'Voor drugs gelden aparte grenswaarden en er wordt op straat op getest (WVW 1994, art. 8). Medicijnen met een gele sticker kunnen je rijvaardigheid beïnvloeden; die sticker komt uit de indeling van apothekersorganisatie KNMP.', a:'WVW 1994, art. 8'},
+    {t:'Alcohol', b:'De grens is 0,5 promille, voor een beginnend bestuurder 0,2 promille. Alcohol wordt maar langzaam afgebroken, ongeveer één standaardglas per uur. Koffie, douchen of eten versnelt dat niet.', a:'WVW 1994, art. 8', ill:'alcohol'},
+    {t:'Drugs en medicijnen', b:'Voor drugs gelden aparte grenswaarden en er wordt op straat op getest (WVW 1994, art. 8). Medicijnen met een gele sticker kunnen je rijvaardigheid beïnvloeden; die sticker komt uit de indeling van apothekersorganisatie KNMP.', a:'WVW 1994, art. 8', ill:'alcohol'},
     {t:'Afleiding', b:'Een telefoon vasthouden mag niet. Ook navigatie instellen, eten of een gesprek over je schouder kost aandacht. Zet alles klaar voordat je wegrijdt.', a:'RVV 1990, art. 61a'},
     {t:'Agressie in het verkeer', b:'Boos reageren maakt een situatie alleen gevaarlijker. Laat je niet opjagen, hou afstand en maak geen oogcontact met iemand die uitdaagt.', a:'WVW 1994, art. 5'},
     {t:'Zuinig en veilig gaan samen', b:'Ver vooruitkijken, vloeiend rijden en op tijd gas loslaten scheelt brandstof én voorkomt hard remmen. De zuinige rijstijl is ook de rustige rijstijl.', a:'Het Nieuwe Rijden'}
@@ -588,7 +635,7 @@ window.MODULES2 = [
     {t:'Lading', b:'Lading moet goed vastzitten en mag het zicht en de verlichting niet belemmeren. Achter de auto mag lading maximaal één meter uitsteken, met een markeringsbord. Aan de voorkant mag alleen ondeelbare lading uitsteken, ook hooguit één meter.', a:'Regeling voertuigen, art. 5.18.12 en 5.18.13'},
     {t:'Gevaarlijke overtredingen', b:'Artikel 5 WVW verbiedt gevaar of hinder veroorzaken. Artikel 6 gaat over een ongeval met letsel of de dood door schuld. Artikel 7 verbiedt doorrijden na een ongeval. Artikel 8 gaat over rijden onder invloed.', a:'WVW 1994, art. 5 t/m 8'},
     {t:'Ontzegging van de rijbevoegdheid', b:'Een rechter kan je rijbevoegdheid ontzeggen. Rijd je toch, dan is dat een misdrijf. Bij zware overtredingen kan je rijbewijs ook direct ingevorderd worden.', a:'WVW 1994, art. 9 en 164'},
-    {t:'Aanhangwagen', b:'Met rijbewijs B mag je een aanhanger trekken als de combinatie niet zwaarder is dan 3.500 kg. Met code 96 mag dat tot 4.250 kg, met rijbewijs BE tot 7.000 kg.', a:'Reglement rijbewijzen'},
+    {t:'Aanhangwagen', b:'Met rijbewijs B mag je een aanhanger trekken als de combinatie niet zwaarder is dan 3.500 kg. Met code 96 mag dat tot 4.250 kg, met rijbewijs BE tot 7.000 kg.', a:'Reglement rijbewijzen', ill:'aanhanger'},
     {t:'Kenteken en RDW', b:'Elk motorvoertuig heeft een kenteken dat bij de RDW geregistreerd staat. Verkoop je je auto, dan zorg je voor overschrijving en een vrijwaringsbewijs; anders blijf je aansprakelijk voor boetes en belasting.', a:'WVW 1994, art. 36, 50 en 51a'}
   ],
   questions:[
@@ -620,12 +667,12 @@ window.MODULES2 = [
   id:'voertuig', nr:8, titel:'Voertuigkennis', kleur:'--m-voertuig',
   samenvatting:'Dashboardlampjes, banden, remmen, verlichting, vloeistoffen en rijhulpsystemen (ADAS).',
   lessons:[
-    {t:'Kleuren op je dashboard', b:'Rood betekent: stop zo snel mogelijk veilig en zet de motor uit. Oranje of geel betekent: er is iets mis, laat het nakijken. Groen en blauw zijn alleen informatie, zoals groot licht of richtingaanwijzer.', a:'Regeling voertuigen'},
-    {t:'Rode lampjes die je niet mag negeren', b:'Oliedruk (oliekannetje), laadstroom (accu), koelvloeistoftemperatuur en het remsysteem. Doorrijden met een brandend oliedruklampje kan je motor binnen enkele kilometers vernielen.', a:'Regeling voertuigen'},
+    {t:'Kleuren op je dashboard', b:'Rood betekent: stop zo snel mogelijk veilig en zet de motor uit. Oranje of geel betekent: er is iets mis, laat het nakijken. Groen en blauw zijn alleen informatie, zoals groot licht of richtingaanwijzer.', a:'Regeling voertuigen', ill:'dashboard'},
+    {t:'Rode lampjes die je niet mag negeren', b:'Oliedruk (oliekannetje), laadstroom (accu), koelvloeistoftemperatuur en het remsysteem. Doorrijden met een brandend oliedruklampje kan je motor binnen enkele kilometers vernielen.', a:'Regeling voertuigen', ill:'dashboard'},
     {t:'Oranje lampjes', b:'Motorstoring (motorsymbool), ABS, ESP, bandenspanning en roetfilter. Je kunt meestal nog rijden, maar een systeem werkt niet of minder goed. Laat het snel nakijken.', a:'Regeling voertuigen'},
-    {t:'Banden', b:'De wettelijke minimale profieldiepte is 1,6 millimeter. Voor winterbanden wordt vier millimeter aangeraden, maar dat is een advies. Controleer ook op scheuren en bobbels en op gelijkmatige slijtage.', a:'Regeling voertuigen, art. 5.2.27'},
+    {t:'Banden', b:'De wettelijke minimale profieldiepte is 1,6 millimeter. Voor winterbanden wordt vier millimeter aangeraden, maar dat is een advies. Controleer ook op scheuren en bobbels en op gelijkmatige slijtage.', a:'Regeling voertuigen, art. 5.2.27', ill:'bandprofiel'},
     {t:'Remmen', b:'ABS voorkomt blokkeren zodat je kunt blijven sturen. De remassistent (BAS) versterkt je remkracht bij een noodstop. ESP of ESC remt individuele wielen af om slippen te voorkomen.', a:'Regeling voertuigen'},
-    {t:'Verlichting controleren', b:'Dimlicht, groot licht, achterlicht, remlicht, richtingaanwijzers, kentekenverlichting en mistlicht moeten werken. Een kapot remlicht zie je zelf niet; laat iemand meekijken.', a:'RVV 1990, art. 32 t/m 41'},
+    {t:'Verlichting controleren', b:'Dimlicht, groot licht, achterlicht, remlicht, richtingaanwijzers, kentekenverlichting en mistlicht moeten werken. Een kapot remlicht zie je zelf niet; laat iemand meekijken.', a:'RVV 1990, art. 32 t/m 41', ill:'dimlicht'},
     {t:'Vloeistoffen', b:'Motorolie, koelvloeistof, remvloeistof en ruitensproeiervloeistof controleer je regelmatig. Olie peil je op een vlakke ondergrond met koude motor.', a:'Regeling voertuigen'},
     {t:'Massa’s', b:'De massa ledig voertuig is het gewicht van de lege auto. De toegestane maximummassa is wat de auto maximaal mag wegen inclusief lading en inzittenden. Het verschil is je laadvermogen.', a:'Regeling voertuigen'},
     {t:'ADAS: rijhulpsystemen', b:'Adaptieve cruisecontrol houdt afstand, de rijstrookassistent stuurt je terug, dodehoekdetectie waarschuwt bij voertuigen naast je en de noodremassistent remt zelf. Ze ondersteunen, ze nemen het niet over.', a:'Regeling voertuigen en EU-verordening 2019/2144'},
@@ -830,6 +877,510 @@ voertuig: [
 
 </script>
 <script>
+/* Taferelen bij de lesstof: 18 schematische diagrammen als inline SVG.
+   Inline en niet als bestand, omdat de artifact-CSP externe afbeeldingen
+   blokkeert — dezelfde reden als bij de borden.
+
+   Kleurafspraak: lijnen en tekst gebruiken currentColor, zodat ze in het
+   lichte en het donkere thema meelopen met de tekstkleur van de container.
+   Vlakken op de achtergrond gebruiken var(--surface-2) en secundaire lijnen
+   var(--line) / var(--fg-3) — dat zijn de variabelen die index.html echt
+   definieert. Alleen echte verkeerskleuren staan hard in de code: asfalt,
+   belijning, rood/oranje/groen en glas. Die betekenen iets en mogen dus niet
+   per thema verschuiven.
+
+   Elke functie geeft een string terug met een <svg> van 320 breed zonder
+   height; index.html schaalt via CSS (width:100%). Mobiel-eerst: ze worden
+   op ongeveer 360 px bekeken, dus lettergroottes blijven 11-13. */
+(function(){
+
+/* Hulpvormen. Ze staan binnen de IIFE en niet in het object zelf, want
+   window.ILLUSTRATIES moet precies de 18 taferelen bevatten: index.html mag
+   er overheen lopen zonder op hulpsleutels te stuiten. Ze geven een fragment
+   terug zonder <svg>-wikkel, omdat ze altijd in een tafereel landen. */
+function autoZij(kleur){
+  return '<g>' +
+    '<path d="M5 24h62v-6c0-2.4-1.8-4.2-4.8-4.8l-7.2-6c-1.8-1.8-3.6-2.4-6-2.4H26c-3 0-4.8 1-6.6 3L14 13.2C8 14.2 5 16.2 5 19z" fill="' + kleur + '"/>' +
+    '<path d="M25 7h10v6H19z" fill="#cfe2ff" opacity=".85"/>' +
+    '<path d="M37 7h7c1.6 0 2.4.5 3.6 1.7L51.2 13H37z" fill="#cfe2ff" opacity=".85"/>' +
+    '<circle cx="20" cy="25" r="6.5" fill="#222"/><circle cx="20" cy="25" r="2.6" fill="#bbb"/>' +
+    '<circle cx="54" cy="25" r="6.5" fill="#222"/><circle cx="54" cy="25" r="2.6" fill="#bbb"/>' +
+    '</g>';
+}
+function mens(x, y, kleur){
+  return '<g transform="translate(' + x + ' ' + y + ')">' +
+    '<circle cx="0" cy="-18" r="5" fill="' + kleur + '"/>' +
+    '<path d="M0 -13v10M-6 -8h12M0 -3l-5 9M0 -3l5 9" stroke="' + kleur + '" stroke-width="2.5" stroke-linecap="round" fill="none"/>' +
+    '</g>';
+}
+
+window.ILLUSTRATIES = {
+
+  /* Het sterkste diagram van de set: twee balken onder elkaar laten zien dat
+     bij dubbele snelheid de reactieafstand verdubbelt maar de remweg vier
+     keer zo lang wordt. Daarom staan beide balken op dezelfde schaal. */
+  stopafstand: function(){
+    return '<svg viewBox="0 0 320 170" width="100%" role="img" ' +
+      'aria-label="Balkdiagram: bij 50 km per uur is de stopafstand ongeveer 14 plus 13 is 27 meter, bij 100 km per uur 28 plus 50 is 78 meter. De snelheid verdubbelt, de remweg wordt vier keer zo lang.">' +
+      '<rect x="0" y="0" width="320" height="170" rx="8" fill="var(--surface-2)"/>' +
+      /* Schaal: 1 meter = 3,4 px, zodat 78 m net binnen de breedte past. */
+      '<text x="14" y="22" font-size="12" fill="currentColor" font-weight="700">Stopafstand</text>' +
+      '<rect x="100" y="14" width="12" height="9" rx="2" fill="#2f6bbf"/>' +
+      '<text x="117" y="22" font-size="11" fill="currentColor">reactie</text>' +
+      '<rect x="168" y="14" width="12" height="9" rx="2" fill="#e8403f"/>' +
+      '<text x="185" y="22" font-size="11" fill="currentColor">remweg</text>' +
+
+      '<text x="14" y="52" font-size="12" fill="currentColor">50 km/h</text>' +
+      '<rect x="14" y="58" width="48" height="18" rx="3" fill="#2f6bbf"/>' +
+      '<rect x="62" y="58" width="44" height="18" rx="3" fill="#e8403f"/>' +
+      '<text x="16" y="71" font-size="11" fill="#fff">14 m</text>' +
+      '<text x="66" y="71" font-size="11" fill="#fff">13 m</text>' +
+      '<text x="114" y="71" font-size="12" fill="currentColor" font-weight="700">= 27 m</text>' +
+
+      '<text x="14" y="104" font-size="12" fill="currentColor">100 km/h</text>' +
+      '<rect x="14" y="110" width="95" height="18" rx="3" fill="#2f6bbf"/>' +
+      '<rect x="109" y="110" width="170" height="18" rx="3" fill="#e8403f"/>' +
+      '<text x="16" y="123" font-size="11" fill="#fff">28 m</text>' +
+      '<text x="113" y="123" font-size="11" fill="#fff">50 m</text>' +
+      '<text x="14" y="146" font-size="12" fill="currentColor" font-weight="700">= 78 m</text>' +
+
+      '<path d="M70 150h236" stroke="var(--fg-3)" stroke-width="1" stroke-dasharray="3 3"/>' +
+      '<text x="76" y="163" font-size="11" fill="currentColor">2x snelheid = 4x remweg</text>' +
+      '</svg>';
+  },
+
+  /* Twee seconden is de enige regel die je rijdend kunt tellen; de maatpijl
+     laat zien dat het om tijd gaat en niet om een vast aantal meters. */
+  tweeseconden: function(){
+    return '<svg viewBox="0 0 320 130" width="100%" role="img" ' +
+      'aria-label="Twee auto\'s achter elkaar met een tussenruimte van twee seconden.">' +
+      '<rect x="0" y="40" width="320" height="56" fill="#424b58"/>' +
+      '<rect x="0" y="66" width="320" height="3" fill="#fff" opacity=".2"/>' +
+      '<g transform="translate(10 48)">' + autoZij('#f2c200') + '</g>' +
+      '<g transform="translate(222 48)">' + autoZij('#2f6bbf') + '</g>' +
+      '<path d="M86 104h148" stroke="currentColor" stroke-width="2"/>' +
+      '<path d="M86 104l9-5v10zM234 104l-9-5v10z" fill="currentColor"/>' +
+      '<rect x="134" y="94" width="52" height="20" rx="5" fill="var(--surface-2)" stroke="currentColor" stroke-width="1"/>' +
+      '<text x="145" y="108" font-size="12" fill="currentColor" font-weight="700">2 sec</text>' +
+      '<text x="10" y="26" font-size="12" fill="currentColor">Tel: 21 - 22 nadat de voorligger een punt passeert</text>' +
+      '</svg>';
+  },
+
+  /* Bovenaanzicht: de spiegels dekken kegels af, en wat daartussen valt is de
+     dode hoek. De fietser staat er in, want dat is het hele punt. */
+  dodehoek: function(){
+    return '<svg viewBox="0 0 320 150" width="100%" role="img" ' +
+      'aria-label="Auto van bovenaf met spiegelvelden en het gearceerde dodehoekgebied, met een fietser daarin.">' +
+      '<defs><pattern id="ill-arc" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">' +
+      '<rect x="0" y="0" width="3" height="7" fill="#e8403f" opacity=".45"/></pattern></defs>' +
+      '<rect x="0" y="0" width="320" height="150" rx="8" fill="var(--surface-2)"/>' +
+      /* Spiegelvelden als lichte kegels vanuit de buitenspiegels. */
+      '<path d="M118 52 L10 16 L10 60 Z" fill="#2f6bbf" opacity=".22"/>' +
+      '<path d="M118 98 L10 134 L10 90 Z" fill="#2f6bbf" opacity=".22"/>' +
+      /* Dode hoek: tussen spiegelveld en ooghoek, links achter. */
+      '<path d="M122 96 L58 128 L22 128 L112 104 Z" fill="url(#ill-arc)" stroke="#e8403f" stroke-width="1"/>' +
+      /* Auto van boven, neus naar rechts. */
+      '<rect x="118" y="58" width="130" height="34" rx="12" fill="currentColor" opacity=".85"/>' +
+      '<rect x="150" y="63" width="52" height="24" rx="6" fill="#cfe2ff" opacity=".9"/>' +
+      '<rect x="128" y="52" width="10" height="6" rx="2" fill="currentColor"/>' +
+      '<rect x="128" y="92" width="10" height="6" rx="2" fill="currentColor"/>' +
+      /* Fietser in de dode hoek. */
+      '<circle cx="74" cy="114" r="6" fill="#2fbf71"/>' +
+      '<circle cx="62" cy="122" r="5" fill="none" stroke="currentColor" stroke-width="2"/>' +
+      '<circle cx="86" cy="122" r="5" fill="none" stroke="currentColor" stroke-width="2"/>' +
+      '<path d="M62 122l12 0M74 122l6-8" stroke="currentColor" stroke-width="2"/>' +
+      '<text x="14" y="18" font-size="11" fill="currentColor">spiegelveld</text>' +
+      '<text x="150" y="140" font-size="11" fill="#e8403f" font-weight="700">dode hoek: kijk om</text>' +
+      '</svg>';
+  },
+
+  /* Twee bundels naast elkaar: alleen de lengte en de hoek verschillen, want
+     dat is precies wat het verschil maakt voor de tegenligger. */
+  dimlicht: function(){
+    return '<svg viewBox="0 0 320 150" width="100%" role="img" ' +
+      'aria-label="Dimlicht geeft een korte bundel naar beneden, groot licht een lange bundel die de tegenligger verblindt.">' +
+      '<rect x="0" y="0" width="320" height="150" rx="8" fill="var(--surface-2)"/>' +
+      '<text x="12" y="18" font-size="12" fill="currentColor" font-weight="700">Dimlicht</text>' +
+      '<rect x="0" y="22" width="320" height="46" fill="#424b58"/>' +
+      '<g transform="translate(10 28)">' + autoZij('#2f6bbf') + '</g>' +
+      '<path d="M78 44 L162 62 L78 56 Z" fill="#f2c200" opacity=".75"/>' +
+      '<text x="170" y="60" font-size="11" fill="currentColor">ca. 50 m</text>' +
+      '<g transform="translate(262 28) scale(-1 1)">' + autoZij('#2fbf71') + '</g>' +
+
+      '<text x="12" y="88" font-size="12" fill="currentColor" font-weight="700">Groot licht</text>' +
+      '<rect x="0" y="92" width="320" height="46" fill="#424b58"/>' +
+      '<g transform="translate(10 98)">' + autoZij('#2f6bbf') + '</g>' +
+      '<path d="M78 112 L252 104 L252 126 L78 122 Z" fill="#f2c200" opacity=".75"/>' +
+      '<g transform="translate(300 98) scale(-1 1)">' + autoZij('#2fbf71') + '</g>' +
+      '<text x="150" y="136" font-size="11" fill="#e8403f" font-weight="700">verblindt</text>' +
+      '</svg>';
+  },
+
+  /* Doorsnede, niet het loopvlak: alleen zo is te zien waar de 1,6 mm zit. */
+  bandprofiel: function(){
+    var groeven = '';
+    var i;
+    for(i = 0; i < 5; i++){
+      groeven += '<rect x="' + (62 + i * 38) + '" y="62" width="16" height="34" fill="var(--surface-2)"/>';
+    }
+    return '<svg viewBox="0 0 320 140" width="100%" role="img" ' +
+      'aria-label="Doorsnede van een band: de groeven moeten minstens 1,6 millimeter diep zijn.">' +
+      '<rect x="0" y="0" width="320" height="140" rx="8" fill="var(--surface-2)"/>' +
+      '<rect x="24" y="28" width="272" height="34" rx="6" fill="currentColor" opacity=".55"/>' +
+      '<rect x="24" y="62" width="272" height="34" fill="currentColor" opacity=".85"/>' +
+      groeven +
+      '<rect x="24" y="96" width="272" height="6" rx="2" fill="#424b58"/>' +
+      '<path d="M46 62v34" stroke="#f2c200" stroke-width="2"/>' +
+      '<path d="M46 62l-4 6h8zM46 96l-4-6h8z" fill="#f2c200"/>' +
+      '<rect x="100" y="106" width="118" height="22" rx="6" fill="var(--surface-2)" stroke="currentColor" stroke-width="1"/>' +
+      '<text x="110" y="121" font-size="12" fill="currentColor" font-weight="700">minimaal 1,6 mm</text>' +
+      '<text x="24" y="20" font-size="11" fill="currentColor">profieldiepte</text>' +
+      '</svg>';
+  },
+
+  /* Niet alle lampjes zijn even dringend; de kleur is de boodschap, dus die
+     staat hier centraal met één woord ernaast. */
+  dashboard: function(){
+    return '<svg viewBox="0 0 320 140" width="100%" role="img" ' +
+      'aria-label="Waarschuwingslampjes: rood betekent stoppen, oranje betekent controleren, groen betekent dat iets aan staat.">' +
+      '<rect x="0" y="0" width="320" height="140" rx="8" fill="var(--surface-2)"/>' +
+      '<text x="16" y="24" font-size="12" fill="currentColor" font-weight="700">Kleur = urgentie</text>' +
+
+      '<circle cx="42" cy="56" r="17" fill="#e8403f"/>' +
+      '<path d="M36 50h12M42 50v12" stroke="#fff" stroke-width="3" stroke-linecap="round"/>' +
+      '<text x="72" y="54" font-size="13" fill="currentColor" font-weight="700">Rood</text>' +
+      '<text x="72" y="70" font-size="11" fill="currentColor">stoppen</text>' +
+
+      '<circle cx="42" cy="100" r="17" fill="#f2c200"/>' +
+      '<path d="M42 91v10" stroke="#1b2330" stroke-width="3" stroke-linecap="round"/>' +
+      '<circle cx="42" cy="108" r="2" fill="#1b2330"/>' +
+      '<text x="72" y="98" font-size="13" fill="currentColor" font-weight="700">Oranje</text>' +
+      '<text x="72" y="114" font-size="11" fill="currentColor">controleren</text>' +
+
+      '<circle cx="200" cy="56" r="17" fill="#2fbf71"/>' +
+      '<path d="M192 56l6 6 10-12" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+      '<text x="230" y="54" font-size="13" fill="currentColor" font-weight="700">Groen</text>' +
+      '<text x="230" y="70" font-size="11" fill="currentColor">staat aan</text>' +
+      '</svg>';
+  },
+
+  /* Haaientanden wijzen naar wie moet wachten; de punt staat naar de
+     naderende bestuurder toe. */
+  rotonde: function(){
+    var tanden = '';
+    var i;
+    for(i = 0; i < 5; i++){
+      tanden += '<path d="M' + (150 + i * 9) + ' 128l4.5 9h-9z" fill="#fff"/>';
+    }
+    return '<svg viewBox="0 0 320 160" width="100%" role="img" ' +
+      'aria-label="Rotonde van bovenaf: verkeer op de rotonde heeft voorrang, bij de oprit liggen haaientanden.">' +
+      '<rect x="0" y="0" width="320" height="160" rx="8" fill="var(--surface-2)"/>' +
+      '<circle cx="160" cy="68" r="56" fill="#424b58"/>' +
+      '<circle cx="160" cy="68" r="26" fill="#2fbf71" opacity=".75"/>' +
+      '<circle cx="160" cy="68" r="26" fill="none" stroke="#fff" stroke-width="2"/>' +
+      '<rect x="138" y="118" width="44" height="42" fill="#424b58"/>' +
+      '<rect x="0" y="48" width="106" height="40" fill="#424b58"/>' +
+      '<rect x="214" y="48" width="106" height="40" fill="#424b58"/>' +
+      tanden +
+      /* Pijlen met de rijrichting mee: op een rotonde rijd je rechtsom. */
+      '<path d="M160 24a44 44 0 0 1 38 22" stroke="#fff" stroke-width="3" fill="none"/>' +
+      '<path d="M198 46l-11-2 5-8z" fill="#fff"/>' +
+      '<path d="M160 112a44 44 0 0 1-38-22" stroke="#fff" stroke-width="3" fill="none"/>' +
+      '<path d="M122 90l11 2-5 8z" fill="#fff"/>' +
+      '<text x="190" y="142" font-size="11" fill="currentColor" font-weight="700">haaientanden: verleen voorrang</text>' +
+      '</svg>';
+  },
+
+  /* De vluchtstrook is geen rijstrook: hij heeft daarom een doorgetrokken
+     streep en een andere toon dan de rijstroken. */
+  snelweg: function(){
+    var streep = '';
+    var i;
+    for(i = 0; i < 9; i++){
+      streep += '<rect x="' + (8 + i * 36) + '" y="63" width="20" height="4" rx="2" fill="#fff"/>';
+    }
+    return '<svg viewBox="0 0 320 150" width="100%" role="img" ' +
+      'aria-label="Autosnelweg van bovenaf met twee rijstroken, een vluchtstrook rechts en een invoegstrook.">' +
+      '<rect x="0" y="0" width="320" height="150" rx="8" fill="var(--surface-2)"/>' +
+      '<rect x="0" y="24" width="320" height="86" fill="#424b58"/>' +
+      '<rect x="0" y="24" width="320" height="4" fill="#fff"/>' +
+      streep +
+      '<rect x="0" y="100" width="320" height="4" fill="#fff"/>' +
+      '<rect x="0" y="104" width="320" height="18" fill="#3a434e"/>' +
+      '<path d="M150 150 L230 122 L320 122 L320 104 L198 104 Z" fill="#424b58"/>' +
+      '<text x="10" y="48" font-size="11" fill="#fff">rijstrook</text>' +
+      '<text x="10" y="88" font-size="11" fill="#fff">rijstrook</text>' +
+      '<text x="10" y="118" font-size="11" fill="#fff">vluchtstrook</text>' +
+      '<text x="196" y="142" font-size="11" fill="currentColor" font-weight="700">invoegstrook</text>' +
+      '<text x="10" y="18" font-size="11" fill="currentColor">vluchtstrook alleen bij pech</text>' +
+      '</svg>';
+  },
+
+  /* Op een erf is de hele breedte van de weg speelruimte; daarom staan de
+     figuren bewust niet netjes op een stoep. */
+  erf: function(){
+    return '<svg viewBox="0 0 320 150" width="100%" role="img" ' +
+      'aria-label="Erf van bovenaf: voetgangers mogen de hele breedte gebruiken, je rijdt er stapvoets, ongeveer 15 kilometer per uur.">' +
+      '<rect x="0" y="0" width="320" height="150" rx="8" fill="var(--surface-2)"/>' +
+      '<rect x="0" y="30" width="320" height="86" fill="#424b58"/>' +
+      '<rect x="0" y="30" width="320" height="86" fill="#2f6bbf" opacity=".12"/>' +
+      /* Vier figuren verspreid over de volle breedte. */
+      mens(46, 54, '#f2c200') +
+      mens(104, 92, '#2fbf71') +
+      mens(176, 48, '#e8403f') +
+      mens(236, 88, '#cfe2ff') +
+      '<circle cx="140" cy="100" r="6" fill="#e8403f"/>' +
+      '<path d="M140 100l22 8" stroke="currentColor" stroke-width="2"/>' +
+      '<rect x="252" y="40" width="56" height="24" rx="6" fill="#2f6bbf"/>' +
+      '<text x="262" y="56" font-size="12" fill="#fff" font-weight="700">15</text>' +
+      '<text x="282" y="56" font-size="10" fill="#fff">km/h</text>' +
+      '<text x="10" y="20" font-size="12" fill="currentColor" font-weight="700">Erf: stapvoets, voetganger gaat voor</text>' +
+      '<text x="10" y="136" font-size="11" fill="currentColor">parkeren alleen in de vakken met een P</text>' +
+      '</svg>';
+  },
+
+  /* Andreaskruis plus knipperlichten plus bomen: de drie dingen die je bij
+     een overweg moet herkennen, in één beeld. */
+  spoorweg: function(){
+    return '<svg viewBox="0 0 320 150" width="100%" role="img" ' +
+      'aria-label="Spoorwegovergang met andreaskruis, rode knipperlichten en gesloten bomen.">' +
+      '<rect x="0" y="0" width="320" height="150" rx="8" fill="var(--surface-2)"/>' +
+      '<rect x="0" y="54" width="320" height="52" fill="#424b58"/>' +
+      /* Rails en dwarsliggers. */
+      '<rect x="0" y="66" width="320" height="4" fill="var(--fg-3)"/>' +
+      '<rect x="0" y="90" width="320" height="4" fill="var(--fg-3)"/>' +
+      '<rect x="140" y="60" width="40" height="40" fill="#5a6470"/>' +
+      /* Andreaskruis: enkel spoor. */
+      '<g transform="translate(40 16)">' +
+      '<path d="M0 0l34 24M34 0L0 24" stroke="#e8403f" stroke-width="6" stroke-linecap="round"/>' +
+      '<rect x="14" y="26" width="6" height="36" fill="var(--fg-3)"/>' +
+      '</g>' +
+      /* Knipperlichten. */
+      '<circle cx="110" cy="26" r="9" fill="#e8403f"/>' +
+      '<circle cx="134" cy="26" r="9" fill="#e8403f" opacity=".3"/>' +
+      '<rect x="119" y="34" width="6" height="28" fill="var(--fg-3)"/>' +
+      /* Bomen, gesloten. */
+      '<rect x="196" y="40" width="112" height="9" rx="4" fill="#e8403f"/>' +
+      '<rect x="206" y="40" width="14" height="9" fill="#fff"/>' +
+      '<rect x="240" y="40" width="14" height="9" fill="#fff"/>' +
+      '<rect x="274" y="40" width="14" height="9" fill="#fff"/>' +
+      '<rect x="194" y="40" width="6" height="34" fill="var(--fg-3)"/>' +
+      '<text x="10" y="128" font-size="11" fill="currentColor" font-weight="700">Rood knipperlicht: stoppen, ook zonder trein</text>' +
+      '<text x="10" y="144" font-size="11" fill="currentColor">Nooit de overweg op als je er niet af kunt</text>' +
+      '</svg>';
+  },
+
+  /* De afstandsmarkering en de vluchtdeur zijn het enige dat telt als het
+     misgaat; daarom staan ze groot in beeld. */
+  tunnel: function(){
+    var lampen = '';
+    var i;
+    for(i = 0; i < 6; i++){
+      lampen += '<rect x="' + (36 + i * 46) + '" y="34" width="22" height="5" rx="2" fill="#f2c200"/>';
+    }
+    return '<svg viewBox="0 0 320 150" width="100%" role="img" ' +
+      'aria-label="Tunnelbuis met verlichting, een afstandsmarkering en een vluchtdeur.">' +
+      '<rect x="0" y="0" width="320" height="150" rx="8" fill="var(--surface-2)"/>' +
+      '<path d="M16 130V60a144 46 0 0 1 288 0v70z" fill="#2b323c"/>' +
+      lampen +
+      '<rect x="16" y="112" width="288" height="18" fill="#424b58"/>' +
+      '<rect x="120" y="119" width="80" height="4" rx="2" fill="#fff" opacity=".8"/>' +
+      /* Vluchtdeur met groen pictogram. */
+      '<rect x="248" y="76" width="30" height="36" rx="3" fill="#2fbf71"/>' +
+      '<rect x="256" y="84" width="8" height="20" rx="2" fill="#fff"/>' +
+      '<text x="226" y="72" font-size="11" fill="#2fbf71" font-weight="700">vluchtdeur</text>' +
+      /* Afstandsmarkering langs de wand. */
+      '<rect x="36" y="84" width="46" height="20" rx="4" fill="#fff"/>' +
+      '<text x="42" y="99" font-size="12" fill="#1b2330" font-weight="700">100 m</text>' +
+      '<text x="36" y="76" font-size="11" fill="#f2c200">afstandsmarkering</text>' +
+      '<text x="16" y="146" font-size="11" fill="currentColor">Pech: alarmlichten aan, motor uit, sleutel in het slot</text>' +
+      '</svg>';
+  },
+
+  /* De auto staat vóór de strepen stil: wachten op de zebra zelf is te laat. */
+  zebra: function(){
+    var strepen = '';
+    var i;
+    for(i = 0; i < 5; i++){
+      strepen += '<rect x="' + (150 + i * 20) + '" y="40" width="11" height="64" fill="#fff"/>';
+    }
+    return '<svg viewBox="0 0 320 150" width="100%" role="img" ' +
+      'aria-label="Voetgangersoversteekplaats: de auto staat stil voor de zebra terwijl een voetganger wacht om over te steken.">' +
+      '<rect x="0" y="0" width="320" height="150" rx="8" fill="var(--surface-2)"/>' +
+      '<rect x="0" y="40" width="320" height="64" fill="#424b58"/>' +
+      strepen +
+      '<rect x="140" y="40" width="4" height="64" fill="#fff" opacity=".5"/>' +
+      '<g transform="translate(20 52)">' + autoZij('#2f6bbf') + '</g>' +
+      mens(188, 118, '#f2c200') +
+      '<path d="M188 110v-10" stroke="currentColor" stroke-width="2"/>' +
+      '<path d="M188 96l-5 8h10z" fill="currentColor"/>' +
+      '<text x="12" y="24" font-size="12" fill="currentColor" font-weight="700">Stoppen voor de zebra, niet erop</text>' +
+      '<text x="12" y="140" font-size="11" fill="currentColor">Niet inhalen vlak voor een zebra</text>' +
+      '</svg>';
+  },
+
+  /* Pijlen vertellen het hele verhaal: de achterkant gaat de ene kant op,
+     het stuur gaat dezelfde kant op. */
+  slippen: function(){
+    return '<svg viewBox="0 0 320 150" width="100%" role="img" ' +
+      'aria-label="De achterkant van de auto breekt naar rechts uit; stuur dan naar dezelfde kant, naar de slip toe.">' +
+      '<rect x="0" y="0" width="320" height="150" rx="8" fill="var(--surface-2)"/>' +
+      '<rect x="0" y="30" width="320" height="86" fill="#424b58"/>' +
+      '<rect x="0" y="70" width="320" height="4" fill="#fff" opacity=".25"/>' +
+      /* Auto van boven, schuingezet. */
+      '<g transform="translate(120 72) rotate(-18)">' +
+      '<rect x="-62" y="-18" width="124" height="36" rx="12" fill="currentColor" opacity=".85"/>' +
+      '<rect x="-28" y="-13" width="48" height="26" rx="6" fill="#cfe2ff" opacity=".9"/>' +
+      '</g>' +
+      /* Spoor van de uitbrekende achterkant. */
+      '<path d="M44 108q40 14 86 0" stroke="#e8403f" stroke-width="3" fill="none" stroke-dasharray="6 4"/>' +
+      '<path d="M130 108l-11-5 2 10z" fill="#e8403f"/>' +
+      '<text x="38" y="128" font-size="11" fill="#e8403f" font-weight="700">achterkant breekt uit</text>' +
+      /* Stuurrichting. */
+      '<circle cx="246" cy="66" r="24" fill="none" stroke="currentColor" stroke-width="4"/>' +
+      '<path d="M222 66h48M246 66v22" stroke="currentColor" stroke-width="4"/>' +
+      '<path d="M268 40a30 30 0 0 1 14 18" stroke="#2fbf71" stroke-width="3" fill="none"/>' +
+      '<path d="M282 58l-9-6 10-3z" fill="#2fbf71"/>' +
+      '<text x="196" y="112" font-size="11" fill="#2fbf71" font-weight="700">stuur naar de slip toe</text>' +
+      '<text x="12" y="22" font-size="11" fill="currentColor">Niet remmen, gas los, kijk waar je heen wilt</text>' +
+      '</svg>';
+  },
+
+  /* Mistlicht achter mag pas onder de 50 m zicht: de drie auto's laten zien
+     hoe snel het zicht wegvalt. */
+  mist: function(){
+    return '<svg viewBox="0 0 320 140" width="100%" role="img" ' +
+      'aria-label="In mist neemt het zicht af; onder de vijftig meter zicht mag het mistlicht achter aan en geldt maximaal vijftig kilometer per uur.">' +
+      '<rect x="0" y="0" width="320" height="140" rx="8" fill="var(--surface-2)"/>' +
+      '<rect x="0" y="34" width="320" height="70" fill="#424b58"/>' +
+      '<g transform="translate(16 46)">' + autoZij('#2f6bbf') + '</g>' +
+      '<g transform="translate(130 46)" opacity=".55">' + autoZij('var(--asfalt)') + '</g>' +
+      '<g transform="translate(240 46)" opacity=".2">' + autoZij('var(--asfalt)') + '</g>' +
+      /* Mistsluier: wordt naar rechts dichter. */
+      '<rect x="100" y="34" width="220" height="70" fill="var(--surface-2)" opacity=".55"/>' +
+      '<rect x="200" y="34" width="120" height="70" fill="var(--surface-2)" opacity=".55"/>' +
+      '<circle cx="18" cy="74" r="5" fill="#e8403f"/>' +
+      '<text x="12" y="26" font-size="11" fill="currentColor" font-weight="700">mistlicht achter aan</text>' +
+      '<path d="M16 116h120" stroke="currentColor" stroke-width="2"/>' +
+      '<path d="M16 116l9-5v10zM136 116l-9-5v10z" fill="currentColor"/>' +
+      '<text x="46" y="132" font-size="12" fill="currentColor" font-weight="700">zicht &lt; 50 m</text>' +
+      '<text x="172" y="132" font-size="11" fill="currentColor">dan maximaal 50 km/h</text>' +
+      '</svg>';
+  },
+
+  /* De koppeling en de kogeldruk zijn waar het in de vragen om gaat, dus die
+     krijgen hier de maatpijl. */
+  aanhanger: function(){
+    return '<svg viewBox="0 0 320 140" width="100%" role="img" ' +
+      'aria-label="Auto met aanhangwagen: de koppeling verbindt beide, het maximum getrokken gewicht staat op het kentekenbewijs.">' +
+      '<rect x="0" y="0" width="320" height="140" rx="8" fill="var(--surface-2)"/>' +
+      '<rect x="0" y="86" width="320" height="22" fill="#424b58"/>' +
+      '<g transform="translate(6 56)">' + autoZij('#2f6bbf') + '</g>' +
+      /* Dissel en koppeling. */
+      '<path d="M78 92l24-6" stroke="currentColor" stroke-width="3"/>' +
+      '<circle cx="90" cy="89" r="6" fill="none" stroke="#e8403f" stroke-width="2"/>' +
+      '<text x="62" y="124" font-size="11" fill="#e8403f" font-weight="700">koppeling</text>' +
+      /* Aanhanger. */
+      '<rect x="102" y="56" width="140" height="32" rx="4" fill="currentColor" opacity=".7"/>' +
+      '<circle cx="146" cy="92" r="10" fill="#222"/><circle cx="146" cy="92" r="4" fill="#bbb"/>' +
+      '<circle cx="206" cy="92" r="10" fill="#222"/><circle cx="206" cy="92" r="4" fill="#bbb"/>' +
+      '<path d="M102 44h140" stroke="currentColor" stroke-width="2"/>' +
+      '<path d="M102 44l9-5v10zM242 44l-9-5v10z" fill="currentColor"/>' +
+      '<text x="110" y="38" font-size="11" fill="currentColor" font-weight="700">max. getrokken massa</text>' +
+      '<text x="12" y="22" font-size="11" fill="currentColor">Rijbewijs B: combinatie tot 3500 kg</text>' +
+      '<text x="250" y="124" font-size="11" fill="currentColor">80 km/h</text>' +
+      '</svg>';
+  },
+
+  /* 30 meter is de afstand die mensen onderschatten; daarom staat hij als
+     maat in beeld en niet alleen als woord. */
+  pech: function(){
+    return '<svg viewBox="0 0 320 140" width="100%" role="img" ' +
+      'aria-label="Auto met pech op de vluchtstrook, alarmlichten aan en een gevarendriehoek op ongeveer dertig meter erachter.">' +
+      '<rect x="0" y="0" width="320" height="140" rx="8" fill="var(--surface-2)"/>' +
+      '<rect x="0" y="30" width="320" height="48" fill="#424b58"/>' +
+      '<rect x="0" y="78" width="320" height="4" fill="#fff"/>' +
+      '<rect x="0" y="82" width="320" height="22" fill="#3a434e"/>' +
+      '<text x="8" y="97" font-size="10" fill="#fff">vluchtstrook</text>' +
+      '<g transform="translate(228 76)">' + autoZij('#f2c200') + '</g>' +
+      /* Alarmlichten als pulserende stippen op beide hoeken. */
+      '<circle cx="232" cy="92" r="4" fill="#f2c200"/>' +
+      '<circle cx="300" cy="92" r="4" fill="#f2c200"/>' +
+      /* Gevarendriehoek erachter. */
+      '<path d="M86 104 L104 74 L122 104 Z" fill="none" stroke="#e8403f" stroke-width="5" stroke-linejoin="round"/>' +
+      '<path d="M66 118h152" stroke="currentColor" stroke-width="2"/>' +
+      '<path d="M66 118l9-5v10zM218 118l-9-5v10z" fill="currentColor"/>' +
+      '<text x="116" y="134" font-size="12" fill="currentColor" font-weight="700">ca. 30 m</text>' +
+      '<text x="10" y="22" font-size="11" fill="currentColor">Stap uit aan de rechterkant, ga achter de vangrail staan</text>' +
+      '</svg>';
+  },
+
+  /* De loop over schouder en heupbot is het verschil tussen houden en
+     doorsnijden; daarom is de gordel de enige gekleurde lijn. */
+  gordel: function(){
+    return '<svg viewBox="0 0 320 160" width="100%" role="img" ' +
+      'aria-label="Driepuntsgordel: de band loopt over het midden van de schouder en laag over de heupen, niet over de buik.">' +
+      '<rect x="0" y="0" width="320" height="160" rx="8" fill="var(--surface-2)"/>' +
+      /* Stoel. */
+      '<path d="M96 26h52v96h66v22H96z" fill="currentColor" opacity=".15"/>' +
+      /* Inzittende, zijaanzicht. */
+      '<circle cx="132" cy="44" r="18" fill="currentColor" opacity=".7"/>' +
+      '<path d="M118 62h32q14 0 14 16v44h-46z" fill="currentColor" opacity=".7"/>' +
+      '<path d="M118 122h74v22h-74z" fill="currentColor" opacity=".7"/>' +
+      /* De gordel zelf. */
+      '<path d="M126 62 L162 118" stroke="#e8403f" stroke-width="7" stroke-linecap="round"/>' +
+      '<path d="M122 128 L184 128" stroke="#e8403f" stroke-width="7" stroke-linecap="round"/>' +
+      '<circle cx="162" cy="124" r="6" fill="#f2c200"/>' +
+      '<text x="196" y="72" font-size="11" fill="currentColor" font-weight="700">midden over</text>' +
+      '<text x="196" y="86" font-size="11" fill="currentColor">de schouder</text>' +
+      '<path d="M192 74l-30 12" stroke="var(--fg-3)" stroke-width="1"/>' +
+      '<text x="200" y="134" font-size="11" fill="currentColor" font-weight="700">laag over de heup</text>' +
+      '<path d="M196 130l-16-2" stroke="var(--fg-3)" stroke-width="1"/>' +
+      '<text x="14" y="152" font-size="11" fill="currentColor">Niet gedraaid, niet onder de arm</text>' +
+      '</svg>';
+  },
+
+  /* Twee grenzen, twee balken: de beginner heeft minder ruimte, en de
+     reactietijd loopt op nog voor je iets merkt. */
+  alcohol: function(){
+    return '<svg viewBox="0 0 320 160" width="100%" role="img" ' +
+      'aria-label="Alcoholgrenzen: 0,5 promille voor ervaren bestuurders en 0,2 promille voor beginnende bestuurders; de reactietijd loopt op.">' +
+      '<rect x="0" y="0" width="320" height="160" rx="8" fill="var(--surface-2)"/>' +
+      /* Glas. */
+      '<path d="M26 24h44l-6 36-10 8v22h12v6H30v-6h12V68l-10-8z" fill="#cfe2ff" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>' +
+      /* Grenzen. */
+      '<text x="94" y="36" font-size="12" fill="currentColor" font-weight="700">0,5 promille</text>' +
+      '<text x="94" y="52" font-size="11" fill="currentColor">ervaren bestuurder</text>' +
+      '<text x="94" y="78" font-size="12" fill="#e8403f" font-weight="700">0,2 promille</text>' +
+      '<text x="94" y="94" font-size="11" fill="currentColor">beginnend bestuurder (5 jaar)</text>' +
+      /* Reactietijd als twee balken. */
+      '<text x="14" y="118" font-size="11" fill="currentColor">nuchter</text>' +
+      '<rect x="92" y="108" width="58" height="12" rx="3" fill="#2fbf71"/>' +
+      '<text x="156" y="118" font-size="11" fill="currentColor">1 sec</text>' +
+      '<text x="14" y="140" font-size="11" fill="currentColor">na alcohol</text>' +
+      '<rect x="92" y="130" width="142" height="12" rx="3" fill="#e8403f"/>' +
+      '<text x="240" y="140" font-size="11" fill="currentColor">veel langer</text>' +
+      '<text x="14" y="156" font-size="11" fill="currentColor">Koffie, douche of frisse lucht helpen niet: alleen tijd.</text>' +
+      '</svg>';
+  }
+
+};
+})();
+
+</script>
+<script>
+/* De 151 namen van generatie 1. Staat los van poke-assets.js omdat de namen
+   wel in alle drie de publicatievormen mogen, en de sprites niet: die zijn van
+   The Pokemon Company. De publieke Pages-versie laadt de tekeningen van PokeAPI.
+   Index 0 is pokedexnummer 1. */
+window.POKE_NAMEN = ["Bulbasaur","Ivysaur","Venusaur","Charmander","Charmeleon","Charizard","Squirtle","Wartortle","Blastoise","Caterpie","Metapod","Butterfree","Weedle","Kakuna","Beedrill","Pidgey","Pidgeotto","Pidgeot","Rattata","Raticate","Spearow","Fearow","Ekans","Arbok","Pikachu","Raichu","Sandshrew","Sandslash","Nidoran-F","Nidorina","Nidoqueen","Nidoran-M","Nidorino","Nidoking","Clefairy","Clefable","Vulpix","Ninetales","Jigglypuff","Wigglytuff","Zubat","Golbat","Oddish","Gloom","Vileplume","Paras","Parasect","Venonat","Venomoth","Diglett","Dugtrio","Meowth","Persian","Psyduck","Golduck","Mankey","Primeape","Growlithe","Arcanine","Poliwag","Poliwhirl","Poliwrath","Abra","Kadabra","Alakazam","Machop","Machoke","Machamp","Bellsprout","Weepinbell","Victreebel","Tentacool","Tentacruel","Geodude","Graveler","Golem","Ponyta","Rapidash","Slowpoke","Slowbro","Magnemite","Magneton","Farfetch'd","Doduo","Dodrio","Seel","Dewgong","Grimer","Muk","Shellder","Cloyster","Gastly","Haunter","Gengar","Onix","Drowzee","Hypno","Krabby","Kingler","Voltorb","Electrode","Exeggcute","Exeggutor","Cubone","Marowak","Hitmonlee","Hitmonchan","Lickitung","Koffing","Weezing","Rhyhorn","Rhydon","Chansey","Tangela","Kangaskhan","Horsea","Seadra","Goldeen","Seaking","Staryu","Starmie","Mr. Mime","Scyther","Jynx","Electabuzz","Magmar","Pinsir","Tauros","Magikarp","Gyarados","Lapras","Ditto","Eevee","Vaporeon","Jolteon","Flareon","Porygon","Omanyte","Omastar","Kabuto","Kabutops","Aerodactyl","Snorlax","Articuno","Zapdos","Moltres","Dratini","Dragonair","Dragonite","Mewtwo","Mew"];
+
+</script>
+<!-- Sprites zitten hier ingebakken omdat de artifact-CSP externe afbeeldingen
+     blokkeert. Dit bestand gaat niet mee naar de publieke repo; die variant
+     laadt de tekeningen van PokeAPI. Zie tools/bouw.js. -->
+<!-- poke-sprites.js: niet meegeleverd in de publieke versie -->
+<script>
 (function(){
 "use strict";
 var SIGNS = window.SIGNS || [];
@@ -850,6 +1401,9 @@ var S = {
   mod:{}, leitner:{}, fout:[], examens:[], gezien:{},
   // Wat je vandaag gedaan hebt. Wordt vanzelf leeggemaakt zodra het een nieuwe dag is.
   dag:{datum:'', taken:{}, xp:0, goed:0, fout:0, dagnr:0},
+  // Eén beloning per afgeronde programmadag, puur numeriek. S gaat bij elke
+  // wijziging volledig naar de database, dus hier hoort geen base64 in.
+  beloningen:[],   // [{d:dagnummer, p:pokedexnummer, s:shiny 0|1, t:'JJJJ-MM-DD'}]
   instel:{geluid:true, animatie:true}
 };
 MODULES.forEach(function(m){ S.mod[m.id]={goed:0,fout:0,les:0}; });
@@ -872,6 +1426,21 @@ function schoon(raw){
     xp:+raw.dag.xp||0, goed:+raw.dag.goed||0, fout:+raw.dag.fout||0,
     dagnr:+raw.dag.dagnr||0
   };
+  /* Beloningen worden gemerget op dagnummer in plaats van vervangen. initOpslag
+     laat de serverversie winnen zodra daar meer XP in zit; zonder deze merge
+     zou een oudere serverversie de hele collectie wissen. */
+  if(Array.isArray(raw.beloningen)){
+    var bezetDag={};
+    S.beloningen.forEach(function(b){ bezetDag[b.d]=1; });
+    raw.beloningen.forEach(function(b){
+      if(!b||typeof b!=='object') return;
+      var d=+b.d, p=+b.p;
+      if(!(d>=1&&d<=14) || !(p>=1&&p<=151) || bezetDag[d]) return;
+      bezetDag[d]=1;
+      S.beloningen.push({d:d, p:p, s:b.s?1:0, t:typeof b.t==='string'?b.t:''});
+    });
+    S.beloningen.sort(function(a,b){ return a.d-b.d; });
+  }
   if(raw.instel&&typeof raw.instel==='object'){
     S.instel.geluid   = raw.instel.geluid!==false;
     S.instel.animatie = raw.instel.animatie!==false;
@@ -910,7 +1479,11 @@ function bewaar(){
   },700); }
 }
 async function initOpslag(){
-  laadLokaal(); teken();
+  /* Wie al dagen had afgerond voordat de beloningen bestonden, krijgt ze hier
+     alsnog. Geen bewaar(): de uitkomst is deterministisch, dus de eerstvolgende
+     echte wijziging legt precies hetzelfde vast. Opslaan in een opstartpad is
+     bovendien precies waar het eerder misging. */
+  laadLokaal(); vulBeloningenTerug(); teken();
   try{
     var user = await (window.claude && window.claude.use ? window.claude.use('user') : null);
     var d = await (window.claude && window.claude.use ? window.claude.use('db') : null);
@@ -920,6 +1493,8 @@ async function initOpslag(){
     var data = doc && (doc.data ? (typeof doc.data==='function'?doc.data():doc.data) : null);
     if(data && typeof data.xp==='number' && data.xp>=S.xp){ schoon(data); bron='account'; }
     else if(S.xp>0){ bewaar(); }
+    // De serverversie kan dagen bevatten die hier nog geen beloning hadden.
+    if(vulBeloningenTerug()) bewaar();
     bron='account'; teken(); toast('Voortgang gesynchroniseerd met je account');
   }catch(e){ /* lokaal blijft werken */ }
 }
@@ -1157,12 +1732,144 @@ function voltooiTaak(sleutel){
   var dag=huidigeDag(), taken=dagTaken(dag), d=dagState();
   var af=taken.filter(function(t){ return d.taken[t.k]; }).length;
   if(af===taken.length && taken.length && !S.dagenGedaan[dag]){
-    S.dagenGedaan[dag]=1; bewaar();
+    S.dagenGedaan[dag]=1;
+    var bel = kenBeloningToe(dag);   // zelf idempotent, naast de guard hierboven
+    bewaar();
     setTimeout(function(){ geefXP(50,'dag '+dag+' afgerond'); vier('groot');
-      toast('Dag '+dag+' afgerond. Alles van vandaag staat.'); }, 500);
+      if(bel){
+        speelCry(bel.p);
+        toast('Dag '+dag+' afgerond. Je ving '+(bel.s?'een shiny ':'')+pokeNaam(bel.p)+'.');
+      } else {
+        toast('Dag '+dag+' afgerond. Alles van vandaag staat.');
+      }
+    }, 500);
   } else {
     toast(af+' van '+taken.length+' taken klaar vandaag');
   }
+}
+
+/* ======================= BELONINGEN (Pokemon) ======================= */
+/* Elke afgeronde programmadag levert een Pokemon op. De app kent alleen het
+   pokedexnummer; sprite, cry en naam volgen daaruit. Zo blijft S klein genoeg
+   om bij elke wijziging naar de database te gaan.
+
+   Welke je krijgt volgt deterministisch uit het dagnummer, niet uit
+   Math.random(). Anders geeft herladen of synchroniseren een andere uitkomst
+   dan wat er al in de collectie staat. */
+
+/* Legendaries en starters: alleen op een mijlpaaldag. */
+var POKE_ZELDZAAM = [1,2,3,4,5,6,7,8,9,144,145,146,150,151];
+var POKE_GEWOON = (function(){
+  var uit={}, r=[];
+  POKE_ZELDZAAM.forEach(function(p){ uit[p]=1; });
+  for(var i=1;i<=151;i++) if(!uit[i]) r.push(i);
+  return r;
+})();
+function mijlpaalDag(dag){ return dag%5===0 || dag===14; }
+function pokeNaam(p){
+  var n = window.POKE_NAMEN && window.POKE_NAMEN[p-1];
+  return n || ('Nr. '+p);
+}
+/* Kleine deterministische generator (mulberry32). Hetzelfde zaad geeft altijd
+   dezelfde reeks, dus dag 3 levert op elk apparaat dezelfde Pokemon op. */
+function zaad(n){
+  var a = n>>>0;
+  return function(){
+    a = (a + 0x6D2B79F5)>>>0;
+    var t = a;
+    t = Math.imul(t ^ (t>>>15), t|1);
+    t ^= t + Math.imul(t ^ (t>>>7), t|61);
+    return (((t ^ (t>>>14))>>>0) / 4294967296);
+  };
+}
+/* Trekt uit de pool en schuift door zolang je dat nummer al hebt. */
+function trekPoke(pool, rnd, bezet){
+  var start = Math.floor(rnd()*pool.length) % pool.length;
+  for(var i=0;i<pool.length;i++){
+    var p = pool[(start+i)%pool.length];
+    if(!bezet[p]) return p;
+  }
+  return pool[start];   // alles al bezeten: dan maar een dubbele
+}
+/* Idempotent op het dagnummer: tweemaal aanroepen voor dezelfde dag geeft
+   nooit een tweede beloning. `stil` is het terugvullen achteraf — dan telt de
+   foutloze dag van vandaag niet mee, want die ging over een andere dag. */
+function kenBeloningToe(dag, stil){
+  if(!(dag>=1&&dag<=14)) return null;
+  for(var i=0;i<S.beloningen.length;i++) if(S.beloningen[i].d===dag) return null;
+  var rnd = zaad(dag*7919+104729);
+  var bezet={};
+  S.beloningen.forEach(function(b){ bezet[b.p]=1; });
+  var p = trekPoke(mijlpaalDag(dag)?POKE_ZELDZAAM:POKE_GEWOON, rnd, bezet);
+  /* Shiny verdien je: een foutloze dag geeft hem altijd. Daarnaast een kleine
+     vaste kans, zodat het niet alleen voor de perfecte dagen is weggelegd. */
+  var d = dagState();
+  var foutloos = !stil && d.fout===0 && (d.goed+d.fout)>=10;
+  var shiny = foutloos || rnd()<0.0625;
+  var b = {d:dag, p:p, s:shiny?1:0, t:vandaagStr()};
+  S.beloningen.push(b);
+  S.beloningen.sort(function(a,b2){ return a.d-b2.d; });
+  return b;
+}
+/* Wie al dagen had afgerond voordat dit bestond, krijgt ze alsnog: stil, zonder
+   confetti, zodat het Collectie-tabblad niet leeg opent. */
+function vulBeloningenTerug(){
+  var nieuw=0;
+  for(var dag=1;dag<=14;dag++) if(S.dagenGedaan[dag] && kenBeloningToe(dag,true)) nieuw++;
+  return nieuw;
+}
+
+/* ---------- Sprite en geluid ---------- */
+/* De artifact-CSP blokkeert externe afbeeldingen, dus daar zitten de sprites
+   als data-URI in poke-assets.js. Dat bestand gaat bewust niet mee naar de
+   publieke repo (de tekeningen zijn van The Pokemon Company); die variant laadt
+   ze van PokeAPI. Dat is deze ene if. */
+function spriteBron(id, shiny){
+  var bron = shiny ? window.POKE_SHINY : window.POKE_SPRITE;
+  if(bron && bron[id]) return 'data:image/png;base64,'+bron[id];
+  return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+
+         (shiny?'shiny/':'')+id+'.png';
+}
+/* Alleen náást de artifact gepubliceerd; elders bestaat dit pad niet en valt
+   het geluid terug op de synth. */
+function cryBron(id){ return 'poke/cry/'+id+'.ogg'; }
+
+/* Safari en iOS spelen geen Ogg Vorbis en falen daarbij stil. Eén keer vragen
+   is genoeg; daarna weten we het voor de hele sessie. */
+var KAN_OGG = (function(){
+  try{ return !!document.createElement('audio').canPlayType('audio/ogg; codecs="vorbis"'); }
+  catch(e){ return false; }
+})();
+/* Elk pokedexnummer krijgt zijn eigen reeks tonen, zodat de terugval niet voor
+   alle 151 hetzelfde piepje is. Respecteert S.instel.geluid via tonen(). */
+function synthCry(id){
+  var rnd = zaad(id*2654435761);
+  var basis = 300 + (id%24)*18;
+  var reeks = [], t = 0;
+  for(var i=0;i<4;i++){
+    var f = basis * (1 + Math.floor(rnd()*7)/6);
+    var duur = 0.07 + rnd()*0.08;
+    reeks.push([Math.round(f), t, duur]);
+    t += duur*0.8;
+  }
+  tonen(reeks, (id%3===0)?'triangle':'sawtooth', 0.07);
+}
+/* Start het geluid meteen bij de klik: iOS laat audio alleen binnen de
+   gebruikersactie toe. Elke tak die misgaat valt terug op de synth. */
+function speelCry(id){
+  if(!S.instel.geluid) return;
+  if(!KAN_OGG){ synthCry(id); return; }
+  var gedaan = false;
+  function terugval(){ if(gedaan) return; gedaan=true; synthCry(id); }
+  try{
+    var a = new Audio(cryBron(id));
+    a.volume = 0.5;
+    a.addEventListener('error', terugval);
+    a.addEventListener('playing', function(){ gedaan = true; });
+    var pr = a.play();
+    if(pr && pr.catch) pr.catch(terugval);
+    setTimeout(terugval, 900);   // stil mislukt: dan alsnog een geluidje
+  }catch(e){ terugval(); }
 }
 
 /* ======================= BORDEN ======================= */
@@ -1484,10 +2191,16 @@ var TAB='vandaag';
 var TABS=[
   {id:'vandaag', nm:'Vandaag', ic:'<path d="M3 9h18M7 3v4M17 3v4"/><rect x="3" y="5" width="18" height="16" rx="2"/>'},
   {id:'leren',   nm:'Leren',   ic:'<path d="M4 5a2 2 0 012-2h12a2 2 0 012 2v16l-8-4-8 4z"/>'},
-  {id:'borden',  nm:'Borden',  ic:'<path d="M12 2l9 9-9 9-9-9z"/><path d="M12 8v4M12 15h.01"/>'},
   {id:'examen',  nm:'Examen',  ic:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'},
+  {id:'collectie', nm:'Collectie', ic:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/>'},
   {id:'pass',    nm:'Pass',    ic:'<path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6L12 16.8 6.7 19.6l1.1-6L3.4 9.4l6-.8z"/>'}
 ];
+/* Borden is geen eigen tabblad meer maar een segment binnen Leren, zodat
+   Collectie erbij past zonder dat de balk zes knoppen krijgt. Elke oude sprong
+   naar TAB='borden' loopt via deze functie. */
+var LEER_SEG='modules';          // 'modules' | 'borden'
+var OPEN_MOD=null;               // welke accordeonrij openstaat; teken() mag hem niet dichtklappen
+function naarBorden(){ TAB='leren'; LEER_SEG='borden'; }
 function kopBij(){
   var L=levelInfo();
   $('#lvl').textContent=L.n; $('#lvlnm').textContent=L.naam;
@@ -1507,7 +2220,10 @@ function tekenNav(){
 function teken(){
   kopBij(); tekenNav();
   var v=$('#view'); v.innerHTML='';
-  ({vandaag:vVandaag, leren:vLeren, borden:vBorden, examen:vExamen, pass:vPass, instel:vInstel}[TAB]||vVandaag)(v);
+  // 'borden' blijft in de dispatch staan: oude opgeslagen of gedeelde toestand
+  // zou anders stil op Vandaag uitkomen.
+  if(TAB==='borden') naarBorden();
+  ({vandaag:vVandaag, leren:vLeren, examen:vExamen, collectie:vCollectie, pass:vPass, instel:vInstel}[TAB]||vVandaag)(v);
 }
 
 /* ---------- INSTELLINGEN ---------- */
@@ -1615,7 +2331,7 @@ function vVandaag(v){
   if(dag<=10 && mod){
     acties.appendChild(taakKaart('les','Lesstof lezen', mod.lessons.length+' kaartjes · '+mod.titel, function(){ startLes(mod); }));
     acties.appendChild(taakKaart('quiz','Quiz', '10 vragen uit '+mod.titel, function(){ startQuiz(schud(mod.questions).slice(0,10), 'Quiz · '+mod.titel, 'quiz'); }));
-    acties.appendChild(taakKaart('borden','Flashcards borden', '20 borden volgens het Leitner-systeem', function(){ TAB='borden'; teken(); startFlash(); }));
+    acties.appendChild(taakKaart('borden','Flashcards borden', '20 borden volgens het Leitner-systeem', function(){ naarBorden(); teken(); startFlash(); }));
     if(mod.puzzles.length) acties.appendChild(taakKaart('puzzel','Situatiepuzzel', mod.puzzles.length+' kruispunten', function(){ startPuzzels(mod); }));
   } else {
     acties.appendChild(taakKaart('examen','Proefexamen', EXAM.vragen+' vragen · '+EXAM.minuten+' minuten · '+EXAM.grens+' goed om te slagen', function(){ TAB='examen'; teken(); startExamen(); }));
@@ -1690,61 +2406,94 @@ function modStatKaart(m){
 }
 
 /* ---------- LEREN ---------- */
+/* Twee segmenten in één tabblad: de modules en de borden. Borden had een eigen
+   knop in de onderbalk; die ruimte is nu voor Collectie. */
 function vLeren(v){
   var h=el('div','stack');
   h.appendChild(el('h2',null,'Leren'));
+
+  var seg=el('div','seg');
+  [['modules','Modules'],['borden','Borden']].forEach(function(p){
+    var b=el('button','segknop'+(LEER_SEG===p[0]?' aan':''), p[1]);
+    b.type='button'; b.setAttribute('aria-pressed', LEER_SEG===p[0]?'true':'false');
+    b.onclick=function(){ LEER_SEG=p[0]; teken(); };
+    seg.appendChild(b);
+  });
+  h.appendChild(seg);
+  v.appendChild(h);
+
+  if(LEER_SEG==='borden'){ vBorden(v, true); return; }
+
   h.appendChild(el('div','small muted','Kies een module. Je leest eerst de kaartjes en maakt daarna de quiz.'));
+
   var planVandaag=DAGPLAN[huidigeDag()-1];
   var plan_mod_vandaag = planVandaag ? planVandaag.mod : null;
-  MODULES.forEach(function(m){
-    var c=el('div','card stack modkaart');
-    c.style.setProperty('--c','var('+m.kleur+')');
-    var kop=el('div','modkop');
-    var ic=el('div','modbadge'); ic.style.color='var('+m.kleur+')'; ic.innerHTML=AFB.modIcoon(m.id,30);
-    kop.appendChild(ic);
-    var kb=el('div'); kb.style.minWidth='0';
-    kb.appendChild(el('div','eyebrow','Module '+m.nr));
-    kb.appendChild(el('h3',null,m.titel));
-    kop.appendChild(kb);
-    c.appendChild(kop);
-    c.appendChild(el('div','small muted',m.samenvatting));
 
-    /* Wat je met deze module al gedaan hebt, zodat je voortgang hier net zo
-       zichtbaar is als op Vandaag. */
+  /* Acht compacte rijen passen samen op één telefoonscherm, zodat je in één
+     blik ziet hoe ver je met elke module bent. Eén rij tegelijk open. */
+  var lijst=el('div','card leerlijst');
+  MODULES.forEach(function(m){
     var st=S.mod[m.id]||{goed:0,fout:0,les:0}, tot=st.goed+st.fout;
     var pct = tot ? Math.round(st.goed/tot*100) : 0;
     var gelezen = st.les>0;
     var medaille = tot<10 ? null : pct>=90?'Goud':pct>=75?'Zilver':pct>=60?'Brons':'Blijf oefenen';
-    var stat=el('div','modstat');
-    var p1=el('span','pil'+(gelezen?' aan':''));
-    p1.innerHTML=(gelezen?'<svg viewBox="0 0 24 24" class="pilv"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
-      + (gelezen?'Lesstof gelezen':'Lesstof nog niet gelezen');
-    stat.appendChild(p1);
-    var p2=el('span','pil'+(tot?' aan':''), tot ? st.goed+' van '+tot+' goed ('+pct+'%)' : 'nog geen vragen gemaakt');
-    stat.appendChild(p2);
-    if(medaille) stat.appendChild(el('span','pil medaille',medaille));
-    var dvandaag=dagState();
-    if(plan_mod_vandaag===m.id){
-      var taken=dagTaken(huidigeDag());
-      var af=taken.filter(function(x){ return dvandaag.taken[x.k]; }).length;
-      stat.appendChild(el('span','pil nu','Module van vandaag · '+af+' van '+taken.length+' taken'));
-    }
-    c.appendChild(stat);
-    if(tot){
-      var bar=el('div','bar'); var bi=el('i'); bi.style.width=pct+'%';
-      bi.style.background='var('+m.kleur+')'; bar.appendChild(bi); c.appendChild(bar);
-    }
+    var open = OPEN_MOD===m.id;
+    var nu = plan_mod_vandaag===m.id;
 
-    var row=el('div'); row.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
-    var b1=el('button','btn sec'+(gelezen?' gedaan':''), (gelezen?'✓ ':'')+'Lesstof ('+m.lessons.length+')');
-    b1.onclick=function(){startLes(m)};
-    var b2=el('button','btn','Quiz ('+m.questions.length+')'); b2.onclick=function(){startQuiz(schud(m.questions),'Quiz · '+m.titel)};
-    row.appendChild(b1); row.appendChild(b2);
-    if(m.puzzles.length){ var b3=el('button','btn sec','Puzzels ('+m.puzzles.length+')'); b3.onclick=function(){startPuzzels(m)}; row.appendChild(b3); }
-    c.appendChild(row);
-    h.appendChild(c);
+    var wrap=el('div','leerblok'+(open?' open':'')+(nu?' nu':''));
+    wrap.style.setProperty('--c','var('+m.kleur+')');
+
+    var rij=el('button','leerrij'); rij.type='button';
+    rij.setAttribute('aria-expanded', open?'true':'false');
+    var ic=el('span','leerico'); ic.style.color='var('+m.kleur+')'; ic.innerHTML=AFB.modIcoon(m.id,22);
+    rij.appendChild(ic);
+
+    var mid=el('span','leermid');
+    mid.appendChild(el('span','leertitel',m.titel));
+    var bar=el('span','bar leerbar'); var bi=el('i');
+    bi.style.width=(tot?pct:0)+'%'; bi.style.background='var('+m.kleur+')';
+    bar.appendChild(bi); mid.appendChild(bar);
+    rij.appendChild(mid);
+
+    rij.appendChild(el('span','leerpct', tot ? pct+'%' : '—'));
+    rij.appendChild(el('span','leermed', medaille||''));
+    var ch=el('span','leerchev');
+    ch.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    rij.appendChild(ch);
+    rij.onclick=function(){ OPEN_MOD = open ? null : m.id; teken(); };
+    wrap.appendChild(rij);
+
+    if(open){
+      var p=el('div','leerpaneel stack');
+      p.appendChild(el('div','eyebrow','Module '+m.nr));
+      p.appendChild(el('div','small muted',m.samenvatting));
+
+      var stat=el('div','modstat');
+      var p1=el('span','pil'+(gelezen?' aan':''));
+      p1.innerHTML=(gelezen?'<svg viewBox="0 0 24 24" class="pilv"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>':'')
+        + (gelezen?'Lesstof gelezen':'Lesstof nog niet gelezen');
+      stat.appendChild(p1);
+      stat.appendChild(el('span','pil'+(tot?' aan':''), tot ? st.goed+' van '+tot+' goed ('+pct+'%)' : 'nog geen vragen gemaakt'));
+      if(medaille) stat.appendChild(el('span','pil medaille',medaille));
+      if(nu){
+        var dvandaag=dagState(), taken=dagTaken(huidigeDag());
+        var af=taken.filter(function(x){ return dvandaag.taken[x.k]; }).length;
+        stat.appendChild(el('span','pil nu','Module van vandaag · '+af+' van '+taken.length+' taken'));
+      }
+      p.appendChild(stat);
+
+      var row=el('div'); row.style.cssText='display:flex;gap:8px;flex-wrap:wrap';
+      var b1=el('button','btn sec'+(gelezen?' gedaan':''), (gelezen?'✓ ':'')+'Lesstof ('+m.lessons.length+')');
+      b1.onclick=function(){startLes(m)};
+      var b2=el('button','btn','Quiz ('+m.questions.length+')'); b2.onclick=function(){startQuiz(schud(m.questions),'Quiz · '+m.titel)};
+      row.appendChild(b1); row.appendChild(b2);
+      if(m.puzzles.length){ var b3=el('button','btn sec','Puzzels ('+m.puzzles.length+')'); b3.onclick=function(){startPuzzels(m)}; row.appendChild(b3); }
+      p.appendChild(row);
+      wrap.appendChild(p);
+    }
+    lijst.appendChild(wrap);
   });
-  v.appendChild(h);
+  h.appendChild(lijst);
 }
 function startLes(m){
   var i=0;
@@ -1758,6 +2507,15 @@ function startLes(m){
     var c=el('div','card stack');
     c.appendChild(el('div','eyebrow',m.titel));
     c.appendChild(el('h3',null,L.t));
+    /* Een tekening alleen waar hij de uitleg echt sterker maakt. Het veld `ill`
+       staat expliciet in de content; geen trefwoordherkenning, want dat gaat op
+       termijn altijd mis. Lessen over één specifiek bord krijgen niets: daar
+       doet de bordChip uit elB() het werk al. */
+    if(L.ill && window.ILLUSTRATIES && window.ILLUSTRATIES[L.ill]){
+      var fig=el('div','lesill');
+      fig.innerHTML=window.ILLUSTRATIES[L.ill]();
+      c.appendChild(fig);
+    }
     c.appendChild(elB('div',null,L.b));
     c.appendChild(el('div','art',L.a));
     h.appendChild(c);
@@ -1875,9 +2633,11 @@ function startPuzzels(m){
 }
 
 /* ---------- BORDEN ---------- */
-function vBorden(v){
+/* `ingebed` is waar als dit het Borden-segment binnen Leren is; dan staat de
+   kop er al. */
+function vBorden(v, ingebed){
   var h=el('div','stack');
-  h.appendChild(el('h2',null,'Borden'));
+  if(!ingebed) h.appendChild(el('h2',null,'Borden'));
   var bakken=[0,0,0,0,0,0];
   SIGNS.forEach(function(s){ bakken[bakVan(s.c)]++; });
   var c=el('div','card stack');
@@ -1951,14 +2711,14 @@ function startFlash(){
         cc.appendChild(el('div','score tnum',goed+'/'+stapel.length));
         cc.appendChild(el('div','muted','Borden die je niet wist komen morgen weer terug.'));
         e.appendChild(cc);
-        var ab2=el('button','btn wide','Terug'); ab2.onclick=function(){TAB='borden';teken()}; e.appendChild(ab2);
+        var ab2=el('button','btn wide','Terug'); ab2.onclick=function(){naarBorden();teken()}; e.appendChild(ab2);
         v2.appendChild(e); if(goed===stapel.length) vier('klein'); voltooiTaak('borden');
       }
     }
     ok.onclick=function(){verder(true)}; fout.onclick=function(){verder(false)};
     c.appendChild(draai); c.appendChild(keuzes);
     h.appendChild(c);
-    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){TAB='borden';teken()}; h.appendChild(ab);
+    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){naarBorden();teken()}; h.appendChild(ab);
     v.appendChild(h); $('#main').scrollTop=0;
   }
   toon();
@@ -1996,14 +2756,14 @@ function startBordQuiz(){
         fb.appendChild(elB('div','small',Q.s.b));
         c.appendChild(fb);
         var nb=el('button','btn wide', i===vragen.length-1?'Klaar':'Volgende');
-        nb.onclick=function(){ i++; if(i<vragen.length) toon(); else { if(goed===vragen.length) vier('klein'); toast('Bordenquiz: '+goed+'/'+vragen.length); voltooiTaak('borden'); TAB='borden'; teken(); } };
+        nb.onclick=function(){ i++; if(i<vragen.length) toon(); else { if(goed===vragen.length) vier('klein'); toast('Bordenquiz: '+goed+'/'+vragen.length); voltooiTaak('borden'); naarBorden(); teken(); } };
         c.appendChild(nb); nb.focus();
       };
       grid.appendChild(t);
     });
     c.appendChild(grid);
     h.appendChild(c);
-    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){TAB='borden';teken()}; h.appendChild(ab);
+    var ab=el('button','btn sec wide','Stoppen'); ab.onclick=function(){naarBorden();teken()}; h.appendChild(ab);
     v.appendChild(h); $('#main').scrollTop=0;
   }
   toon();
@@ -2204,6 +2964,81 @@ function eindExamen(){
 }
 
 /* ---------- BATTLE PASS ---------- */
+/* ---------- COLLECTIE ---------- */
+/* Raster van 151 vakjes. Wat je verdiend hebt toont de sprite, de rest een
+   silhouet — zo zie je meteen wat er nog te halen valt. */
+function vCollectie(v){
+  var h=el('div','stack');
+  h.appendChild(el('h2',null,'Collectie'));
+
+  var perNr={};
+  S.beloningen.forEach(function(b){ perNr[b.p]=b; });
+  var aantal=S.beloningen.length;
+  var shinies=S.beloningen.filter(function(b){ return b.s; }).length;
+
+  var k=el('div','card stack');
+  k.appendChild(el('div','eyebrow','Eén per afgeronde dag'));
+  k.appendChild(el('div','small muted','Elke dag van het veertiendaagse programma die je afrondt levert er één op. Een foutloze dag geeft altijd een shiny.'));
+  var cij=el('div','cijfers');
+  [[aantal+' / 14','gevangen'],[shinies,'shiny'],[Object.keys(perNr).length+' / 151','verschillend']].forEach(function(p){
+    var c=el('div','cijfer');
+    c.appendChild(el('div','cv',String(p[0])));
+    c.appendChild(el('div','cl',p[1]));
+    cij.appendChild(c);
+  });
+  k.appendChild(cij);
+  /* Welke mijlpaal er aankomt, want daar zitten de legendaries en starters. */
+  var volgendeMijl=null;
+  for(var dg=1;dg<=14;dg++) if(!S.dagenGedaan[dg] && mijlpaalDag(dg)){ volgendeMijl=dg; break; }
+  k.appendChild(el('div','small muted', volgendeMijl
+    ? 'Dag '+volgendeMijl+' is een mijlpaaldag: dan trek je uit de zeldzame pool (legendaries en starters).'
+    : 'Alle mijlpaaldagen zijn gehaald.'));
+  h.appendChild(k);
+
+  var detail=el('div','card stack pokedetail');
+  detail.hidden=true;
+  h.appendChild(detail);
+
+  var g=el('div','card'); g.style.padding='10px';
+  var grid=el('div','grid g-poke');
+  for(var i=1;i<=151;i++) grid.appendChild(pokeVak(i, perNr[i], detail));
+  g.appendChild(grid);
+  h.appendChild(g);
+  v.appendChild(h);
+}
+function pokeVak(id, bel, detail){
+  var t=el('button','pokevak'+(bel?' heb':'')+(bel&&bel.s?' shiny':'')); t.type='button';
+  var im=document.createElement('img');
+  im.src=spriteBron(id, bel && bel.s);
+  im.alt = bel ? pokeNaam(id) : 'Nog niet gevangen';
+  im.loading='lazy'; im.width=56; im.height=56;
+  /* Sprites kunnen op de publieke versie van PokeAPI komen; valt dat weg, dan
+     blijft het vakje leeg in plaats van een gebroken plaatje te tonen. */
+  im.onerror=function(){ im.style.visibility='hidden'; };
+  t.appendChild(im);
+  t.appendChild(el('span','pokenr','#'+id));
+  if(!bel){ t.setAttribute('aria-label','Nummer '+id+', nog niet gevangen'); return t; }
+  t.setAttribute('aria-label', pokeNaam(id)+(bel.s?', shiny':'')+', dag '+bel.d);
+  t.onclick=function(){
+    speelCry(id);                      // meteen bij de klik: iOS eist dat
+    detail.hidden=false;
+    detail.innerHTML='';
+    var kop=el('div','pokekop');
+    var gr=document.createElement('img');
+    gr.src=spriteBron(id, bel.s); gr.alt=''; gr.width=84; gr.height=84; gr.className='pokegroot';
+    gr.onerror=function(){ gr.style.visibility='hidden'; };
+    kop.appendChild(gr);
+    var box=el('div'); box.style.minWidth='0';
+    box.appendChild(el('div','eyebrow','#'+id+(bel.s?' · shiny':'')));
+    box.appendChild(el('h3',null,pokeNaam(id)));
+    box.appendChild(el('div','small muted','Dag '+bel.d+(bel.t?' · '+bel.t:'')+(mijlpaalDag(bel.d)?' · mijlpaaldag':'')));
+    kop.appendChild(box);
+    detail.appendChild(kop);
+    detail.scrollIntoView({block:'nearest'});
+  };
+  return t;
+}
+
 function vPass(v){
   var t=passTier();
   var h=el('div','stack');
