@@ -130,6 +130,19 @@ nav{flex:0 0 auto;background:var(--surface);border-top:1px solid var(--line);
 
 /* ---- puzzel ---- */
 .scene{width:100%;max-width:340px;margin:0 auto;display:block;border-radius:12px;background:var(--surface-2)}
+/* Beeld bij een vraag. max-width gelijk aan .scene zodat een situatie en een puzzel
+   even groot ogen; img en svg krijgen dezelfde behandeling. */
+.vraagbeeld{width:100%;max-width:340px;margin:0 auto}
+.vraagbeeld img,.vraagbeeld svg{width:100%;height:auto;display:block;border-radius:12px;background:var(--surface-2)}
+/* Hotspot: het beeld is zelf het invoerveld, dus de markering ligt erbovenop. */
+.hotspot{position:relative;width:100%;max-width:340px;margin:0 auto;cursor:crosshair;touch-action:manipulation}
+.hotspot[data-vast]{cursor:default}
+.hotspot .merk{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;
+  border:2.5px solid var(--fg);background:rgba(255,255,255,.35);pointer-events:none}
+.hotspot .merk.vink{border-radius:6px;background:var(--fg);color:var(--bg);
+  display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1}
+.hotspot .hotvak{position:absolute;border-radius:8px;pointer-events:none;border:2.5px dashed var(--goed)}
+.hotspot .hotvak[data-st=fout]{border-color:var(--fout)}
 .actorbtn{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);
   background:var(--surface);cursor:pointer;font-weight:600}
 .actorbtn[data-st="sel"]{border-color:var(--blauw);background:var(--blauw-zacht)}
@@ -293,6 +306,9 @@ header::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:5px
 <script src="content-modules2.js"></script>
 <script src="content-extra.js"></script>
 <script src="illustraties.js"></script>
+<script src="situaties.js"></script>
+<script src="situaties2.js"></script>
+<script src="examenbeeld.js"></script>
 <script src="poke-namen.js"></script>
 <!-- Sprites zitten hier ingebakken omdat de artifact-CSP externe afbeeldingen
      blokkeert. Dit bestand gaat niet mee naar de publieke repo; die variant
@@ -847,13 +863,70 @@ function elB(tag, cls, tekst){
   n.appendChild(metBorden(tekst));
   return n;
 }
+/* Beeld bij een vraag. Twee bronnen op dezelfde sleutels: EXAMENBEELD zit alleen in
+   de priveversie, SITUATIES gaat overal mee. De app weet niet welke van de twee hij te
+   pakken krijgt, zodat dezelfde vraag in beide varianten werkt. */
+function beeldVoor(sleutel){
+  if(!sleutel) return null;
+  var bron = (window.EXAMENBEELD && window.EXAMENBEELD[sleutel]) ||
+             (window.SITUATIES && window.SITUATIES[sleutel]);
+  if(!bron) return null;
+  var uit = (typeof bron==='function') ? bron() : bron;
+  return (typeof uit==='string' && uit) ? uit : null;
+}
+/* Een tafereel is SVG-opmaak of een data-URI; alleen die twee, want de CSP laat geen
+   externe afbeelding door. Geeft een element terug en geen tekst: een img-tag met een
+   bronattribuut in de broncode laat de controle op externe verwijzingen in tools/bouw.js
+   afgaan, en dan is die controle niets meer waard. */
+function beeldNode(sleutel){
+  var b=beeldVoor(sleutel);
+  if(!b) return null;
+  var wrap=el('div','vraagbeeld');
+  if(b.indexOf('<svg')===0){ wrap.innerHTML=b; return wrap; }
+  var img=document.createElement('img');
+  img.setAttribute('src', b);
+  img.alt='Verkeerssituatie';
+  wrap.appendChild(img);
+  return wrap;
+}
 MODULES.forEach(function(m){
-  m.questions = m.questions.filter(function(q){ return !(q.t==='sign' && !SIGN_CODES[q.signCode]); });
-  m.questions.forEach(function(q,i){ q.id=m.id+'#'+i; q.mod=m.id; q.modTitel=m.titel; ALLE.push(q); });
+  m.questions = m.questions.filter(function(q){
+    if(q.t==='sign' && !SIGN_CODES[q.signCode]) return false;
+    /* Een vraag die met "hier" naar beeld verwijst is zonder dat beeld onbeantwoordbaar;
+       wegfilteren is dan beter dan een halve vraag tonen. Zo gaat het al bij bordvragen. */
+    if(q.b && !beeldVoor(q.b)) return false;
+    return true;
+  });
+  /* Het id hangt aan de sleutel k, niet aan de positie in de array. S.fout en S.gezien
+     bewaren deze id's, dus bij herordenen zou de foutenbak stil leeglopen. Vragen zonder
+     k vallen terug op de index, zodat de omzetting module voor module kan. */
+  m.questions.forEach(function(q,i){ q.id=m.id+'#'+(q.k||i); q.mod=m.id; q.modTitel=m.titel; ALLE.push(q); });
 });
 function vraagById(id){ for(var i=0;i<ALLE.length;i++) if(ALLE[i].id===id) return ALLE[i]; return null; }
 function schud(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
 
+/* Aantikbaar beeld voor hotspot- en sleepvragen. Geeft coordinaten in procenten terug,
+   zodat het antwoord losstaat van de schermgrootte. De aanroeper bepaalt wat er met de
+   keuze gebeurt: direct nakijken in de oefenmodus, alleen onthouden in het examen. */
+function beeldVeld(q, kies, start){
+  var wrap=el('div','hotspot');
+  var bn=beeldNode(q.b); if(bn) wrap.appendChild(bn);
+  var merk=el('div','merk');
+  if(q.t==='sleep'){ merk.className='merk vink'; merk.textContent='✓'; }
+  merk.style.display='none';
+  wrap.appendChild(merk);
+  function zet(pt){ merk.style.left=pt.x+'%'; merk.style.top=pt.y+'%'; merk.style.display='block'; }
+  if(start && typeof start.x==='number') zet(start);
+  wrap.onclick=function(e){
+    if(wrap.dataset.vast) return;
+    var r=wrap.getBoundingClientRect();
+    if(!r.width || !r.height) return;
+    var pt={ x:Math.round((e.clientX-r.left)/r.width*1000)/10,
+             y:Math.round((e.clientY-r.top)/r.height*1000)/10 };
+    zet(pt); kies(pt);
+  };
+  return wrap;
+}
 /* ======================= VRAAG RENDEREN ======================= */
 function toonVraag(q, opts){
   opts=opts||{};
@@ -864,6 +937,7 @@ function toonVraag(q, opts){
     var sg=SIGNS.filter(function(s){return s.c===q.signCode})[0];
     if(sg){ var holder=el('div'); holder.style.textAlign='center'; holder.innerHTML=bordSVG(sg,110); box.appendChild(holder); }
   }
+  if(q.b){ var bn2=beeldNode(q.b); if(bn2) box.appendChild(bn2); }
   var vr=elB('h3',null,q.v); vr.style.fontSize='17px'; box.appendChild(vr);
   var opts_wrap=el('div','stack'); opts_wrap.style.gap='8px'; box.appendChild(opts_wrap);
   var antwoordGegeven=false, keuze=[], volgorde=[];
@@ -906,7 +980,7 @@ function toonVraag(q, opts){
       opts_wrap.appendChild(b);
     });
   } else if(q.t==='multi'){
-    box.insertBefore(el('div','small muted','Meerdere antwoorden zijn goed.'), opts_wrap);
+    box.insertBefore(el('div','small muted','Deze vraag is alleen goed als je alle juiste antwoorden aantikt.'), opts_wrap);
     q.o.forEach(function(lab,i){
       var b=elB('button','opt',lab);
       b.onclick=function(){ if(antwoordGegeven)return;
@@ -960,6 +1034,25 @@ function toonVraag(q, opts){
       ok3.remove(); klaar(goed); };
     inp.addEventListener('keydown',function(e){ if(e.key==='Enter') ok3.click(); });
     box.appendChild(ok3);
+  } else if(q.t==='hotspot'||q.t==='sleep'){
+    var punt=null;
+    var veld=beeldVeld(q, function(pt){ punt=pt; ok4.disabled=false; });
+    opts_wrap.appendChild(veld);
+    opts_wrap.insertBefore(el('div','small muted', q.t==='sleep'
+      ? 'Tik de juiste plek aan om het vinkje daar neer te zetten.'
+      : 'Tik de juiste plek in de afbeelding aan.'), veld);
+    var ok4=el('button','btn wide','Controleer'); ok4.disabled=true;
+    ok4.onclick=function(){ if(antwoordGegeven)return;
+      var goed=juist(q,punt);
+      veld.dataset.vast='1';
+      /* Het juiste gebied laten zien is hier de uitleg: bij een hotspot zegt tekst alleen
+         niet waar je had moeten tikken. */
+      var vak=el('div','hotvak');
+      vak.style.cssText='left:'+q.a.x+'%;top:'+q.a.y+'%;width:'+q.a.w+'%;height:'+q.a.h+'%';
+      vak.dataset.st = goed?'goed':'fout';
+      veld.appendChild(vak);
+      ok4.remove(); klaar(goed); };
+    box.appendChild(ok4);
   }
   return box;
 }
@@ -1740,6 +1833,7 @@ function tekenExamen(v){
   var c=el('div','card stack');
   if(q.t==='sign'&&q.signCode){ var sg=SIGNS.filter(function(s){return s.c===q.signCode})[0];
     if(sg){ var hold=el('div'); hold.style.textAlign='center'; hold.innerHTML=bordSVG(sg,110); c.appendChild(hold); } }
+  if(q.b){ var bne=beeldNode(q.b); if(bne) c.appendChild(bne); }
   var vr=elB('h3',null,q.v); vr.style.fontSize='17px'; c.appendChild(vr);
   var ow=el('div','stack'); ow.style.gap='8px'; c.appendChild(ow);
   var huidig=E.ant[E.i];
@@ -1752,7 +1846,7 @@ function tekenExamen(v){
     q.o.forEach(function(lab,i){ var b=elB('button','opt',lab);
       if(huidig===i) b.dataset.st='sel'; b.onclick=function(){zet(i)}; ow.appendChild(b); });
   } else if(q.t==='multi'){
-    c.insertBefore(el('div','small muted','Meerdere antwoorden zijn goed.'), ow);
+    c.insertBefore(el('div','small muted','Deze vraag is alleen goed als je alle juiste antwoorden aantikt.'), ow);
     var cur=Array.isArray(huidig)?huidig.slice():[];
     q.o.forEach(function(lab,i){ var b=elB('button','opt',lab);
       if(cur.indexOf(i)>=0) b.dataset.st='sel';
@@ -1774,6 +1868,11 @@ function tekenExamen(v){
     inp.style.cssText='width:100%;padding:12px 14px;border-radius:11px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);font:inherit';
     inp.oninput=function(){ E.ant[E.i]=inp.value; };
     ow.appendChild(inp);
+  } else if(q.t==='hotspot'||q.t==='sleep'){
+    ow.appendChild(el('div','small muted', q.t==='sleep'
+      ? 'Tik de juiste plek aan om het vinkje daar neer te zetten.'
+      : 'Tik de juiste plek in de afbeelding aan.'));
+    ow.appendChild(beeldVeld(q, function(pt){ zet(pt); }, huidig));
   }
   h.appendChild(c);
 
@@ -1814,6 +1913,13 @@ function juist(q, ant){
     return a.length===k.length && a.every(function(v,i){return v===k[i]}); }
   if(q.t==='order'){ return Array.isArray(ant) && ant.length===q.a.length && ant.every(function(v,i){return v===q.a[i]}); }
   if(q.t==='fill'){ var n=function(x){return (x||'').toLowerCase().replace(/[^a-z0-9]/g,'')}; return n(ant)!=='' && n(ant)===n(q.a); }
+  /* hotspot en sleep verschillen alleen in presentatie: allebei een punt binnen een
+     rechthoek in beeldcoordinaten (0-100 over breedte en hoogte). */
+  if(q.t==='hotspot'||q.t==='sleep'){
+    if(!ant||typeof ant.x!=='number') return false;
+    var r=q.a;
+    return ant.x>=r.x && ant.x<=r.x+r.w && ant.y>=r.y && ant.y<=r.y+r.h;
+  }
   return false;
 }
 function eindExamen(){
